@@ -37,7 +37,8 @@ lib = CDLL("/tmp/ta-lib/venv/lib/libta_lib.so.0.0.0")
 try:
     import talib as ta
 except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/tmp/ta-lib/venv/lib/", "--global-option=-I/tmp/ta-lib/venv/include/", "ta-lib==0.4.24"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/tmp/ta-lib/venv/lib/", "--global-option=-I/tmp/ta-lib/venv/include/", "TA-Lib"])
+    # subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/tmp/ta-lib/venv/lib/", "--global-option=-I/tmp/ta-lib/venv/include/", "ta-lib==0.4.24"])
 finally:
     import talib as ta
 
