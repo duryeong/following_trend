@@ -1,0 +1,9 @@
+name: env-duryeong
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - ta-lib
+  - libta-lib
+  - pandas
+  - yfinance
