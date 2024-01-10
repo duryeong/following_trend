@@ -1,57 +1,7 @@
-import requests
-import os
-import sys
-import subprocess
-
-# check if the library folder already exists, to avoid building everytime you load the pahe
-if not os.path.isdir("/tmp/ta-lib"):
-
-    # Download ta-lib to disk
-    with open("/tmp/ta-lib-0.4.0-src.tar.gz", "wb") as file:
-        response = requests.get(
-            "http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz"
-        )
-        file.write(response.content)
-    # get our current dir, to configure it back again. Just house keeping
-    default_cwd = os.getcwd()
-    os.chdir("/tmp")
-    # untar
-    os.system("tar -zxvf ta-lib-0.4.0-src.tar.gz")
-    os.chdir("/tmp/ta-lib")
-    # build
-    os.system("./configure --prefix=/tmp/ta-lib/venv/")
-    os.system("make -j4")
-    # install
-    os.system("mkdir -p /tmp/ta-lib/venv/")
-    os.system("make install")
-    os.system("ls -la /tmp/ta-lib/venv/")
-    # back to the cwd
-    os.chdir(default_cwd)
-    sys.stdout.flush()
-
-os.environ['LD_LIBRARY_PATH'] = '' \
-                                +";/tmp/ta-lib/venv/" \
-                                +";/tmp/ta-lib/venv/lib/" \
-                                +";/tmp/ta-lib/venv/include/"
-# add the library to our current environment
-# from ctypes import *
-#
-# lib = CDLL("/tmp/ta-lib/venv/lib/libta_lib.so.0.0.0")
-# import library
-try:
-    import talib as ta
-except ImportError:
-    # subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/tmp/ta-lib/venv/lib/", "--global-option=-I/tmp/ta-lib/venv/include/", "TA-Lib"])
-    os.system("pip install TA-Lib")
-    # os.system("pip install --global-option=build_ext --global-option=-L/tmp/ta-lib/venv/lib/ --global-option=-I/tmp/ta-lib/venv/include/ TA-Lib")
-    # subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/tmp/ta-lib/venv/lib/", "--global-option=-I/tmp/ta-lib/venv/include/", "TA-Lib"])
-    # subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/tmp/ta-lib/venv/lib/", "--global-option=-I/tmp/ta-lib/venv/include/", "ta-lib==0.4.24"])
-finally:
-    import talib as ta
-
 import streamlit as st
 import pandas as pd
 import yfinance as yf
+import talib as ta
 
 def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     df[f'rsi{r1}'] = ta.RSI(df['close'], timeperiod=r1)
