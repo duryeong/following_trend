@@ -1,7 +1,8 @@
-name: vudoku
+name: duryeong
 channels:
   - conda-forge
 dependencies:
+- python=3.9
 - ta-lib=0.4.28
 - pip:
     - pandas==2.1.3
