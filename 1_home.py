@@ -36,12 +36,12 @@ from ctypes import *
 lib = CDLL("/home/appuser/venv/lib/libta_lib.so.0.0.0")
 # import library
 try:
-    import talib
+    import talib as ta
 except ImportError:
     init()
     subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/home/appuser/venv/lib/", "--global-option=-I/home/appuser/venv/include/", "ta-lib==0.4.24"])
 finally:
-    import talib
+    import talib as ta
 
 import streamlit as st
 import pandas as pd
