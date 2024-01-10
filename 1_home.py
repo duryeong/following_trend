@@ -20,7 +20,7 @@ if not os.path.isdir("/tmp/ta-lib"):
     os.chdir("/tmp/ta-lib")
     # build
     os.system("./configure --prefix=/tmp/ta-lib/venv/")
-    os.system("make")
+    os.system("make -j4")
     # install
     os.system("mkdir -p /tmp/ta-lib/venv/")
     os.system("make install")
