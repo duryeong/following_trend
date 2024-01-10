@@ -1,23 +1,6 @@
 name: minimal-streamlit-example
 channels:
-- defaults
-- conda-forge
-- ericmjl
+  - defaults
+  - conda-forge
 dependencies:
-- python=3.8
-- conda
-- scikit-learn
-- scipy
-- pandas
-- numpy
-- matplotlib
-- pip
-- pylint
-- pydocstyle
-- flake8
-- black
-- hvplot
-- bokeh
-- holoviews
-- pip:
-  - streamlit
+  - python=3.9
