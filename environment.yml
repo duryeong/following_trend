@@ -1,7 +1,5 @@
-channles:
-  - conda-forge
 dependencies:
-  - ta-lib=0.4.28
-  - libta-lib=0.4.0
-  - pandas=2.1.4
-  - yfinance=0.2.35
+  - conda-forge::ta-lib=0.4.28
+  - conda-forge::libta-lib=0.4.0
+  - conda-forge::pandas=2.1.4
+  - conda-forge::yfinance=0.2.35
