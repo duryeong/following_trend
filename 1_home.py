@@ -20,12 +20,12 @@ def init():
         os.system("tar -zxvf ta-lib-0.4.0-src.tar.gz")
         os.chdir("/tmp/ta-lib")
         # build
-        os.system("./configure --prefix=/home/appuser/venv/")
+        os.system("./configure --prefix=/home/adminuser/venv/")
         os.system("make")
         # install
-        os.system("mkdir -p /home/appuser/venv/")
+        os.system("mkdir -p /home/adminuser/venv/")
         os.system("make install")
-        os.system("ls -la /home/appuser/venv/")
+        os.system("ls -la /home/adminuser/venv/")
         # back to the cwd
         os.chdir(default_cwd)
         sys.stdout.flush()
@@ -33,13 +33,13 @@ def init():
 # add the library to our current environment
 from ctypes import *
 
-lib = CDLL("/home/appuser/venv/lib/libta_lib.so.0.0.0")
+lib = CDLL("/home/adminuser/venv/lib/libta_lib.so.0.0.0")
 # import library
 try:
     import talib as ta
 except ImportError:
     init()
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/home/appuser/venv/lib/", "--global-option=-I/home/appuser/venv/include/", "ta-lib==0.4.24"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/home/adminuser/venv/lib/", "--global-option=-I/home/adminuser/venv/include/", "ta-lib==0.4.24"])
 finally:
     import talib as ta
 
