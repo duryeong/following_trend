@@ -29,7 +29,7 @@ if not os.path.isdir("/tmp/ta-lib"):
     os.chdir(default_cwd)
     sys.stdout.flush()
 
-os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] \
+os.environ['LD_LIBRARY_PATH'] = '' \
                                 +";/tmp/ta-lib/venv/" \
                                 +";/tmp/ta-lib/venv/lib/" \
                                 +";/tmp/ta-lib/venv/include/"
