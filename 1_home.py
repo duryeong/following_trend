@@ -29,16 +29,21 @@ if not os.path.isdir("/tmp/ta-lib"):
     os.chdir(default_cwd)
     sys.stdout.flush()
 
+os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] \
+                                +";/tmp/ta-lib/venv/" \
+                                +";/tmp/ta-lib/venv/lib/" \
+                                +";/tmp/ta-lib/venv/include/"
 # add the library to our current environment
-from ctypes import *
-
-lib = CDLL("/tmp/ta-lib/venv/lib/libta_lib.so.0.0.0")
+# from ctypes import *
+#
+# lib = CDLL("/tmp/ta-lib/venv/lib/libta_lib.so.0.0.0")
 # import library
 try:
     import talib as ta
 except ImportError:
     # subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/tmp/ta-lib/venv/lib/", "--global-option=-I/tmp/ta-lib/venv/include/", "TA-Lib"])
-    os.system("pip install --global-option=build_ext --global-option=-L/tmp/ta-lib/venv/lib/ --global-option=-I/tmp/ta-lib/venv/include/ TA-Lib")
+    os.system("pip install TA-Lib")
+    # os.system("pip install --global-option=build_ext --global-option=-L/tmp/ta-lib/venv/lib/ --global-option=-I/tmp/ta-lib/venv/include/ TA-Lib")
     # subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/tmp/ta-lib/venv/lib/", "--global-option=-I/tmp/ta-lib/venv/include/", "TA-Lib"])
     # subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/tmp/ta-lib/venv/lib/", "--global-option=-I/tmp/ta-lib/venv/include/", "ta-lib==0.4.24"])
 finally:
