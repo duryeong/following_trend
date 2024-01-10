@@ -1,4 +1,3 @@
-import streamlit as st
 import requests
 import os
 import sys
@@ -20,12 +19,12 @@ if not os.path.isdir("/tmp/ta-lib"):
     os.system("tar -zxvf ta-lib-0.4.0-src.tar.gz")
     os.chdir("/tmp/ta-lib")
     # build
-    os.system("./configure --prefix=/home/adminuser/venv/")
+    os.system("./configure --prefix=/tmp/ta-lib/venv/")
     os.system("make")
     # install
-    os.system("mkdir -p /home/adminuser/venv/")
+    os.system("mkdir -p /tmp/ta-lib/venv/")
     os.system("make install")
-    os.system("ls -la /home/adminuser/venv/")
+    os.system("ls -la /tmp/ta-lib/venv/")
     # back to the cwd
     os.chdir(default_cwd)
     sys.stdout.flush()
@@ -33,12 +32,12 @@ if not os.path.isdir("/tmp/ta-lib"):
 # add the library to our current environment
 from ctypes import *
 
-lib = CDLL("/home/adminuser/venv/lib/libta_lib.so.0.0.0")
+lib = CDLL("/tmp/ta-lib/venv/lib/libta_lib.so.0.0.0")
 # import library
 try:
     import talib as ta
 except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/home/adminuser/venv/lib/", "--global-option=-I/home/adminuser/venv/include/", "ta-lib==0.4.24"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/tmp/ta-lib/venv/lib/", "--global-option=-I/home/adminuser/venv/include/", "ta-lib==0.4.24"])
 finally:
     import talib as ta
 
