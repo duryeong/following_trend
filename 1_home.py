@@ -29,11 +29,10 @@ def init():
         # back to the cwd
         os.chdir(default_cwd)
         sys.stdout.flush()
+        # add the library to our current environment
+    from ctypes import *
 
-# add the library to our current environment
-from ctypes import *
-
-lib = CDLL("/home/adminuser/venv/lib/libta_lib.so.0.0.0")
+    lib = CDLL("/home/adminuser/venv/lib/libta_lib.so.0.0.0")
 # import library
 try:
     import talib as ta
