@@ -1,7 +1,8 @@
-
-
 name: vudoku
+channels:
+  - conda-forge
 dependencies:
+- ta-lib=0.4.28
 - pip:
     - pandas==2.1.3
     - streamlit==1.29.0
