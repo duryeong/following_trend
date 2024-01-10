@@ -30,14 +30,13 @@ def init():
         os.chdir(default_cwd)
         sys.stdout.flush()
         # add the library to our current environment
-    from ctypes import *
-
-    lib = CDLL("/home/adminuser/venv/lib/libta_lib.so.0.0.0")
 # import library
 try:
     import talib as ta
 except ImportError:
     init()
+    from ctypes import *
+    lib = CDLL("/home/adminuser/venv/lib/libta_lib.so.0.0.0")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "--global-option=build_ext", "--global-option=-L/home/adminuser/venv/lib/", "--global-option=-I/home/adminuser/venv/include/", "ta-lib==0.4.24"])
 finally:
     import talib as ta
