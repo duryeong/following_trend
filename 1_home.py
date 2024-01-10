@@ -78,16 +78,37 @@ def get_stock_info():
     return df.head(100)
 
 stock_info = get_stock_info()
-st.title(f'HOME')
-st.subheader(f"anal_date:{pd.to_datetime('today').strftime('%Y-%m-%d %H:%M')}")
-tabs = st.tabs([f"{itab}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
+st.title(f'Following Trend')
+st.subheader(f"anal_date : ({pd.to_datetime('today').strftime('%Y-%m-%d %H:%M')})")
 
-for inum, itab in enumerate(tabs):
-    with itab:
-        with st.spinner(f'make info {stock_info.tickers.values[inum]}'):
-            # st.write(f'{stock_info.tickers.values[inum]}')
-            st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
-            candle = get_stock(c=stock_info.tickers.values[inum])
-            candle = make_idx(candle)
-            candle
+last_is_up_list = []
+last_tab_list = []
+with st.expander('sea all_data'):
+    with st.spinner(f'make stodk info '):
+        tabs = st.tabs([f"{itab}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
+        # with st.expander("all_data", False):
+        for inum, itab in enumerate(tabs):
+            with itab:
+                # st.write(f'{stock_info.tickers.values[inum]}')
+                st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
+                candle = get_stock(c=stock_info.tickers.values[inum])
+                candle = make_idx(candle)
+                if candle.is_up.values[0]:
+                    last_tab_list.append(itab)
+                    last_is_up_list.append(candle)
+                st.dataframe(candle, use_container_width=True)
+
+"---"
+
+st.subheader(f"last up list length: {len(last_is_up_list)}")
+try:
+    is_up_tabs = st.tabs([f"{itab}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
+    for inum, itab in enumerate(is_up_tabs):
+        with itab:
+            st.dataframe(last_is_up_list[itab], use_container_width=True)
+except Exception as e:
+    pass
+
+"---"
+
 
