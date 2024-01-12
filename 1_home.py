@@ -57,7 +57,7 @@ def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
         is_up.append(idf[f'rsi{r1}'] > idf[f'rsi{r1*2}'] > idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf.close > idf[f'mean{wmean}'])
     df['is_up'] = is_up
     df['differ'] = (df.close - df.open)/df.open*100
-    df = df[['close', 'differ', 'is_up']]
+    df = df[['open', 'close', 'differ', 'is_up']]
     df = df[::-1]
     return df
 
@@ -94,7 +94,7 @@ with st.expander('sea all_data'):
                 candle = get_stock(c=stock_info.tickers.values[inum])
                 candle = make_idx(candle)
                 if candle.is_up.values[0]:
-                    last_tab_list.append(itab)
+                    last_tab_list.append(stock_info.tickers.values[inum])
                     last_is_up_list.append(candle)
                 st.dataframe(candle, use_container_width=True)
 
@@ -105,7 +105,7 @@ try:
     is_up_tabs = st.tabs([f"{itab}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
     for inum, itab in enumerate(is_up_tabs):
         with itab:
-            st.dataframe(last_is_up_list[itab], use_container_width=True)
+            st.dataframe(last_is_up_list[inum], use_container_width=True)
 except Exception as e:
     pass
 
