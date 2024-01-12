@@ -65,12 +65,12 @@ def get_stock(c='AAPL'):
     stock_code = c
     # Yahoo Finance에서 주식 정보를 가져옵니다.
     stock_data = yf.Ticker(stock_code)
-    df = stock_data.history(interval='1d', period='3mo')
+    df = stock_data.history(interval='1d', period='6mo')
     df.columns = [ic.lower() for ic in list(df.columns)]
     df = df[['open', 'high', 'low', 'close']]
     return df
 
-@st.cache_resource
+@st.cache_data
 def get_stock_info():
     df = pd.read_csv('yfinance_anal.csv')
     df = df.sort_values(by='best_value', ascending=False)
