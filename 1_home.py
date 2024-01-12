@@ -36,7 +36,7 @@ def get_stock_info():
     df = pd.read_csv('yfinance_anal.csv')
     df = df.sort_values(by='best_value', ascending=False)
     df = df[['tickers', 'best_value', 'best_param']]
-    return df.head(100)
+    return df.head(20)
 
 def web_main():
     stock_info = get_stock_info()
