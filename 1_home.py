@@ -18,7 +18,7 @@ def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     df['is_up'] = is_up
     df['differ'] = (df['close']-df['open'])/df['open']*100
 
-    df = df[['is_up', 'differ', 'open', 'close']]
+    df = df[['is_up', 'open', 'close', 'differ']]
     df = df[::-1]
     return df
 
