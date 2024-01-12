@@ -65,7 +65,7 @@ def get_stock(c='AAPL'):
     stock_code = c
     # Yahoo Finance에서 주식 정보를 가져옵니다.
     stock_data = yf.Ticker(stock_code)
-    df = stock_data.history(interval='1d', period='2mo')
+    df = stock_data.history(interval='1d', period='3mo')
     df.columns = [ic.lower() for ic in list(df.columns)]
     df = df[['open', 'high', 'low', 'close']]
     return df
@@ -77,38 +77,41 @@ def get_stock_info():
     df = df[['tickers', 'best_value', 'best_param']]
     return df.head(100)
 
-stock_info = get_stock_info()
-st.title(f'Following Trend')
-st.subheader(f"anal_date : ({pd.to_datetime('today').strftime('%Y-%m-%d %H:%M')})")
+def web_main():
+    stock_info = get_stock_info()
+    st.title(f'Following Trend')
+    st.subheader(f"anal_date : ({pd.to_datetime('today').strftime('%Y-%m-%d %H:%M')})")
 
-last_is_up_list = []
-last_tab_list = []
-with st.expander('sea all_data'):
-    with st.spinner(f'make stodk info '):
-        tabs = st.tabs([f"{itab}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
-        # with st.expander("all_data", False):
-        for inum, itab in enumerate(tabs):
+    last_is_up_list = []
+    last_tab_list = []
+    with st.expander('sea all_data'):
+        with st.spinner(f'make stodk info '):
+            tabs = st.tabs([f"{itab}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
+            # with st.expander("all_data", False):
+            for inum, itab in enumerate(tabs):
+                with itab:
+                    # st.write(f'{stock_info.tickers.values[inum]}')
+                    st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
+                    candle = get_stock(c=stock_info.tickers.values[inum])
+                    candle = make_idx(candle)
+                    if candle.is_up.values[0]:
+                        last_tab_list.append(stock_info.tickers.values[inum])
+                        last_is_up_list.append(candle)
+                    st.dataframe(candle, use_container_width=True)
+
+    "---"
+
+    st.subheader(f"last up list length: {len(last_is_up_list)}")
+    try:
+        is_up_tabs = st.tabs([f"{itab}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
+        for inum, itab in enumerate(is_up_tabs):
             with itab:
-                # st.write(f'{stock_info.tickers.values[inum]}')
-                st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
-                candle = get_stock(c=stock_info.tickers.values[inum])
-                candle = make_idx(candle)
-                if candle.is_up.values[0]:
-                    last_tab_list.append(stock_info.tickers.values[inum])
-                    last_is_up_list.append(candle)
-                st.dataframe(candle, use_container_width=True)
+                st.dataframe(last_is_up_list[inum], use_container_width=True)
+    except Exception as e:
+        pass
 
-"---"
-
-st.subheader(f"last up list length: {len(last_is_up_list)}")
-try:
-    is_up_tabs = st.tabs([f"{itab}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
-    for inum, itab in enumerate(is_up_tabs):
-        with itab:
-            st.dataframe(last_is_up_list[inum], use_container_width=True)
-except Exception as e:
-    pass
-
-"---"
+    "---"
 
 
+if __name__ == "__main__":
+    web_main()
