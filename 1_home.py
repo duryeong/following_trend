@@ -41,7 +41,7 @@ def get_stock_info():
 def web_main():
     stock_info = get_stock_info()
     st.title(f'Following Trend')
-    st.subheader(f"anal_date : ({pd.to_datetime('today').strftime('%Y-%m-%d %H:%M')})")
+    st.subheader(f"anal_date : ({(pd.to_datetime('today')+pd.to_timedelta(9, unit='hour')).strftime('%Y-%m-%d %H:%M')})")
 
     last_is_up_list = []
     last_tab_list = []
