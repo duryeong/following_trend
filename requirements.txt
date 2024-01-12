@@ -1,5 +1,3 @@
 streamlit
 pandas
 yfinance
-Cython
-TA-Box
