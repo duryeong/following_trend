@@ -3,10 +3,7 @@ import pandas as pd
 import yfinance as yf
 import pandas_ta as tb
 import copy
-from requests import get
 
-ip = get('https://api.ipify.org').content.decode('utf8')
-st.subheader('My public IP address is: {}'.format(ip))
 
 def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     df[f'rsi{r1*1}'] = tb.rsi(df['close'], length=r1*1)
