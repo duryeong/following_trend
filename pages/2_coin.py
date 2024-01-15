@@ -3,7 +3,6 @@ import pandas as pd
 import yfinance as yf
 import pandas_ta as tb
 import pyupbit
-import copy
 
 def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     df[f'rsi{r1*1}'] = tb.rsi(df['close'], length=r1*1)
@@ -46,7 +45,9 @@ def get_stock_info():
     df = pd.read_csv('coin_anal.csv')
     df = df.sort_values(by='best_value', ascending=False)
     df = df[['tickers', 'best_value', 'best_param']]
-    return df.head(20)
+    eth_df = df[df.tickers == 'KRW-ETH']
+    odf = pd.concat([eth_df, df.head(20)])
+    return odf
 
 def web_main():
     stock_info = get_stock_info()
@@ -65,7 +66,7 @@ def web_main():
                     st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
                     candle = get_coin(c=stock_info.tickers.values[inum])
                     candle = make_idx(candle)
-                    if candle.is_up.values[0] or stock_info.tickers.values[inum] == "KRW-ETH":
+                    if candle.is_up.values[0]:
                         last_tab_list.append(stock_info.tickers.values[inum])
                         last_is_up_list.append(candle)
                     st.dataframe(candle, use_container_width=True)
