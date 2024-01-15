@@ -5,4 +5,4 @@ p = st.text_input('passwd')
 st.write(p)
 ip = get('https://api.ipify.org').content.decode('utf8')
 if p == '0240':
-    st.subheader('My public IP address is: {}'.format(ip))
+    st.subheader('IP: {}'.format(ip))
