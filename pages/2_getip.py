@@ -1,5 +1,7 @@
 import streamlit as st
 from requests import get
 
+p = st.text_input('passwd')
 ip = get('https://api.ipify.org').content.decode('utf8')
-st.subheader('My public IP address is: {}'.format(ip))
+if p == '0240':
+    st.subheader('My public IP address is: {}'.format(ip))
