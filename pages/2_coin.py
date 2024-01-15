@@ -65,7 +65,7 @@ def web_main():
                     st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
                     candle = get_coin(c=stock_info.tickers.values[inum])
                     candle = make_idx(candle)
-                    if candle.is_up.values[0]:
+                    if candle.is_up.values[0] or stock_info.tickers.values[inum] == "KRW-ETH":
                         last_tab_list.append(stock_info.tickers.values[inum])
                         last_is_up_list.append(candle)
                     st.dataframe(candle, use_container_width=True)
