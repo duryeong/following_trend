@@ -46,7 +46,7 @@ def get_stock_info():
     df = df.sort_values(by='best_value', ascending=False)
     df = df[['tickers', 'best_value', 'best_param']]
     eth_df = df[df.tickers == 'KRW-ETH']
-    odf = pd.concat([eth_df, df.head(20)])
+    odf = pd.concat([eth_df, df.head(30)])
     return odf
 
 def web_main():
