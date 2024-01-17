@@ -31,6 +31,8 @@ def get_coin(c='KRW-BTC'):
     df = pyupbit.get_ohlcv(c, count=30*6)
     df.columns = [ic.lower() for ic in list(df.columns)]
     df = df[['open', 'high', 'low', 'close']]
+    df['open'] = df.close.shift(1)
+    df = df.dropna(axis=0)
     return df
 
 
@@ -39,6 +41,8 @@ def get_kstock(icoin):
     df.index = pd.to_datetime(df.index)
     df.columns = [ic.lower() for ic in list(df.columns)]
     df = df[-60:]
+    df['open'] = df.close.shift(1)
+    df = df.dropna(axis=0)
     return df
 
 def get_stock(c='AAPL'):
@@ -48,6 +52,8 @@ def get_stock(c='AAPL'):
     df = stock_data.history(interval='1d', period='6mo')
     df.columns = [ic.lower() for ic in list(df.columns)]
     df = df[['open', 'high', 'low', 'close']]
+    df['open'] = df.close.shift(1)
+    df = df.dropna(axis=0)
     return df
 
 @st.cache_data
