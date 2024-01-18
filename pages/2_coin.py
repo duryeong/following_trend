@@ -3,6 +3,7 @@ import pandas as pd
 import yfinance as yf
 import pandas_ta as tb
 import pyupbit
+import mplfinance as mpf
 
 def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     df[f'rsi{r1*1}'] = tb.rsi(df['close'], length=r1*1)
@@ -81,6 +82,9 @@ def web_main():
         for inum, itab in enumerate(is_up_tabs):
             with itab:
                 st.dataframe(last_is_up_list[inum], use_container_width=True)
+                fig_df = get_coin(last_tab_list[inum])
+                fig, ax = mpf.plot(fig_df, style='default', type='candle', title=f"{last_tab_list[inum]}", returnfig=True)
+                st.pyplot(fig)
     except Exception as e:
         pass
 

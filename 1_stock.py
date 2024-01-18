@@ -2,8 +2,7 @@ import streamlit as st
 import pandas as pd
 import yfinance as yf
 import pandas_ta as tb
-import copy
-
+import mplfinance as mpf
 
 def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     df[f'rsi{r1*1}'] = tb.rsi(df['close'], length=r1*1)
@@ -21,6 +20,16 @@ def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
 
     df = df[['is_up', 'open', 'close', 'differ']]
     df = df[::-1]
+    return df
+
+def get_stock_for_fig(c='AAPL'):
+    stock_code = c
+    # Yahoo Finance에서 주식 정보를 가져옵니다.
+    stock_data = yf.Ticker(stock_code)
+    df = stock_data.history(interval='1d', period='6mo')
+    df.columns = [ic.lower() for ic in list(df.columns)]
+    df = df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Adj Close': 'adj close',
+                            'Volume': 'volume'})
     return df
 
 def get_stock(c='AAPL'):
@@ -71,11 +80,16 @@ def web_main():
         for inum, itab in enumerate(is_up_tabs):
             with itab:
                 st.dataframe(last_is_up_list[inum], use_container_width=True)
+                # fig = mpf.figure(style='yahoo', figsize=(8, 6))
+                fig_df = get_stock_for_fig(last_tab_list[inum])
+                fig, ax = mpf.plot(fig_df, style='default', type='candle', title=f"{last_tab_list[inum]}", returnfig=True)
+                st.pyplot(fig)
     except Exception as e:
         pass
 
     "---"
 
+# def draw_fig():
 
 if __name__ == "__main__":
     web_main()

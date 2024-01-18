@@ -5,3 +5,4 @@ pandas-ta
 pyupbit
 finance-datareader
 plotly
+mplfinance
