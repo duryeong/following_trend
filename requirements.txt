@@ -6,3 +6,4 @@ pyupbit
 finance-datareader
 plotly
 mplfinance
+pykrx

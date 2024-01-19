@@ -6,6 +6,25 @@ import pandas_ta as tb
 import pyupbit
 import numpy as np
 import mplfinance as mpf
+from pykrx import stock
+import os
+
+def return_name(market):
+    Market = []
+    for ticker in market:
+        Value = stock.get_market_ticker_name(ticker)
+        Market.append([Value,ticker])
+
+    df = pd.DataFrame(Market,columns=['회사명','상장번호'])
+    return df
+
+def get_kmarket_df():
+    KOSDAQ = stock.get_market_ticker_list(market="KOSDAQ")
+    KOSPI = stock.get_market_ticker_list(market="KOSPI")
+    KOSDAQ.extend(KOSPI)
+
+    df = return_name(KOSDAQ)
+    return df
 
 def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     df[f'rsi{r1*1}'] = tb.rsi(df['close'], length=r1*1)
@@ -36,6 +55,14 @@ def get_coin(c='KRW-BTC'):
     df = df.dropna(axis=0)
     return df
 
+def get_kstock_fig(icoin):
+    df = fdr.DataReader(icoin)
+    df.index = pd.to_datetime(df.index)
+    df.columns = [ic.lower() for ic in list(df.columns)]
+    df = df[-60:]
+    # df['open'] = df.close.shift(1)
+    df = df.dropna(axis=0)
+    return df
 
 def get_kstock(icoin):
     df = fdr.DataReader(icoin)
@@ -65,8 +92,21 @@ def get_stock_info():
     df = df[['tickers', 'best_value', 'best_param']]
     return df.head(30)
 
+def ntoname(df, n):
+    try:
+        return df[df['상장번호'] == n]['회사명'].values[0]
+    except:
+        return n
+
 def web_main():
     stock_info = get_stock_info()
+    with st.spinner(f'make kcoin info '):
+        fkstock_info = 'kstock_info.pickle'
+        if not os.path.exists(fkstock_info):
+            kstock_info = get_kmarket_df()
+            kstock_info.to_pickle(fkstock_info)
+        else:
+            kstock_info = pd.read_pickle(fkstock_info)
     st.title(f'Following Trend kstock')
     st.subheader(f"anal_date : ({(pd.to_datetime('today')+pd.to_timedelta(9, unit='hour')).strftime('%Y-%m-%d %H:%M')})")
 
@@ -74,7 +114,7 @@ def web_main():
     last_tab_list = []
     with st.expander('sea all_data'):
         with st.spinner(f'make coin info '):
-            tabs = st.tabs([f"{itab}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
+            tabs = st.tabs([f"{ntoname(kstock_info,itab)}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
             # with st.expander("all_data", False):
             for inum, itab in enumerate(tabs):
                 with itab:
@@ -91,12 +131,13 @@ def web_main():
 
     st.subheader(f"last up list length: {len(last_is_up_list)}")
     try:
-        is_up_tabs = st.tabs([f"{itab}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
+        is_up_tabs = st.tabs([f"{ntoname(kstock_info,itab)}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
         for inum, itab in enumerate(is_up_tabs):
             with itab:
                 st.dataframe(last_is_up_list[inum], use_container_width=True)
-                fig_df = get_kstock(last_tab_list[inum])
-                fig, ax = mpf.plot(fig_df, style='default', type='candle', title=f"{last_tab_list[inum]}", returnfig=True)
+                fig_df = get_kstock_fig(last_tab_list[inum])
+                st.subheader(f"{ntoname(kstock_info, last_tab_list[inum])}")
+                fig, ax = mpf.plot(fig_df, style='default', type='candle', returnfig=True)
                 st.pyplot(fig)
     except Exception as e:
         pass
