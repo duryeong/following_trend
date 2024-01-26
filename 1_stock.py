@@ -16,7 +16,8 @@ def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
         # is_up.append(idf.rsi7 > idf.rsi14 > idf.rsi21 and idf.adx > 20)
         is_up.append(idf[f'rsi{r1}'] > idf[f'rsi{r1*2}'] > idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf.close > idf[f'mean{wmean}'])
     df['is_up'] = is_up
-    df['differ'] = (df['close']-df['open'])/df['open']*100
+    df['pre_close'] = df.close.shift(1)
+    df['differ'] = (df['close']-df['pre_close'])/df['pre_close']*100
 
     df = df[['is_up', 'open', 'close', 'differ']]
     df = df[::-1]
