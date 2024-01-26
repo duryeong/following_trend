@@ -51,17 +51,6 @@ def get_coin(c='KRW-BTC'):
     df = pyupbit.get_ohlcv(c, count=30*6)
     df.columns = [ic.lower() for ic in list(df.columns)]
     df = df[['open', 'high', 'low', 'close']]
-    df['open'] = df.close.shift(1)
-    df = df.dropna(axis=0)
-    return df
-
-def get_kstock_fig(icoin):
-    df = fdr.DataReader(icoin)
-    df.index = pd.to_datetime(df.index)
-    df.columns = [ic.lower() for ic in list(df.columns)]
-    df = df[-60:]
-    # df['open'] = df.close.shift(1)
-    df = df.dropna(axis=0)
     return df
 
 def get_kstock(icoin):
@@ -69,8 +58,6 @@ def get_kstock(icoin):
     df.index = pd.to_datetime(df.index)
     df.columns = [ic.lower() for ic in list(df.columns)]
     df = df[-60:]
-    df['open'] = df.close.shift(1)
-    df = df.dropna(axis=0)
     return df
 
 def get_stock(c='AAPL'):
@@ -80,8 +67,6 @@ def get_stock(c='AAPL'):
     df = stock_data.history(interval='1d', period='6mo')
     df.columns = [ic.lower() for ic in list(df.columns)]
     df = df[['open', 'high', 'low', 'close']]
-    df['open'] = df.close.shift(1)
-    df = df.dropna(axis=0)
     return df
 
 @st.cache_data
@@ -135,7 +120,7 @@ def web_main():
         for inum, itab in enumerate(is_up_tabs):
             with itab:
                 st.dataframe(last_is_up_list[inum], use_container_width=True)
-                fig_df = get_kstock_fig(last_tab_list[inum])
+                fig_df = get_kstock(last_tab_list[inum])
                 st.subheader(f"{ntoname(kstock_info, last_tab_list[inum])}")
                 fig, ax = mpf.plot(fig_df, style='default', type='candle', returnfig=True)
                 st.pyplot(fig)

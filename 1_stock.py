@@ -30,8 +30,6 @@ def get_stock_for_fig(c='AAPL'):
     df.columns = [ic.lower() for ic in list(df.columns)]
     df = df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Adj Close': 'adj close',
                             'Volume': 'volume'})
-    df['open'] = df.close.shift(1)
-    df = df.dropna(axis=0)
     return df
 
 def get_stock(c='AAPL'):
@@ -41,8 +39,6 @@ def get_stock(c='AAPL'):
     df = stock_data.history(interval='1d', period='6mo')
     df.columns = [ic.lower() for ic in list(df.columns)]
     df = df[['open', 'high', 'low', 'close']]
-    df['open'] = df.close.shift(1)
-    df = df.dropna(axis=0)
     return df
 
 @st.cache_data
