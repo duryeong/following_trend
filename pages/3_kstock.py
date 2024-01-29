@@ -1,4 +1,6 @@
 import streamlit as st
+import requests
+from bs4 import BeautifulSoup
 import pandas as pd
 import yfinance as yf
 import FinanceDataReader as fdr
@@ -71,11 +73,27 @@ def get_stock(c='AAPL'):
 
 @st.cache_data
 def get_stock_info():
+    target_codes = get_top_volume()
     df = pd.read_csv('kstock_anal.csv')
     df = df.sort_values(by='best_value', ascending=False)
     df = df[df.best_value != np.inf]
     df = df[['tickers', 'best_value', 'best_param']]
-    return df.head(30)
+    odf = []
+    tickers = []
+    best_value = []
+    best_param = []
+    for idf in df.iloc:
+        if idf.tickers in target_codes:
+            tickers.append(idf.tickers)
+            best_value.append(idf.best_value)
+            best_param.append(idf.best_param)
+
+    odf = pd.DataFrame()
+    odf['tickers'] = tickers
+    odf['best_value'] = best_value
+    odf['best_param'] = best_param
+    # return df.head(30)
+    return odf
 
 def ntoname(df, n):
     try:
@@ -103,14 +121,17 @@ def web_main():
             # with st.expander("all_data", False):
             for inum, itab in enumerate(tabs):
                 with itab:
-                    # st.write(f'{stock_info.tickers.values[inum]}')
-                    st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
-                    candle = get_kstock(stock_info.tickers.values[inum])
-                    candle = make_idx(candle)
-                    if candle.is_up.values[0]:
-                        last_tab_list.append(stock_info.tickers.values[inum])
-                        last_is_up_list.append(candle)
-                    st.dataframe(candle, use_container_width=True)
+                    try:
+                        # st.write(f'{stock_info.tickers.values[inum]}')
+                        st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
+                        candle = get_kstock(stock_info.tickers.values[inum])
+                        candle = make_idx(candle)
+                        if candle.is_up.values[0]:
+                            last_tab_list.append(stock_info.tickers.values[inum])
+                            last_is_up_list.append(candle)
+                        st.dataframe(candle, use_container_width=True)
+                    except Exception as e:
+                        pass
 
     "---"
 
@@ -129,6 +150,40 @@ def web_main():
 
     "---"
 
+def get_top_volume():
+    url = 'http://finance.naver.com'
+    res = requests.get(url).content
+    soup = BeautifulSoup(res, 'html.parser')
+
+    names = []
+    codes = []
+    prices = []
+    delta_prices = []
+    delta_percents = []
+
+    items = soup.find('tbody', {'id': '_topItems1'})
+    item_rows = items.find_all('tr')
+
+    for item in item_rows:
+        # if '상승' in item.find_all('td')[1].get_text():  # 상승한 종목만 리스트에 추가
+        names.append(item.find('th').get_text())  # 종목명
+        # print(item.find('th').get_text())  # code
+        # a = item.find('th').find('a')
+        codes.append(item.find('th').find('a').attrs['href'].split('=')[-1])
+        prices.append(item.find_all('td')[0].get_text())  # 현재가격
+        delta_prices.append(item.find_all('td')[1].get_text()[3:])  # 변동가격, [3:]으로 '상승' 단어를 빼고 가격만 포함
+        delta_percents.append(item.find_all('td')[2].get_text())  # 변동률
+
+    # for i, item in enumerate(delta_prices):
+    #     if '상승' in item:
+    #         delta_prices[i] = item.replace('상승','').strip()
+    #     elif '하락' in item:
+    #         delta_prices[i] = item.replace('하락','').strip()
+
+    df = pd.DataFrame({'code':codes, '가격': prices, '가격변동': delta_prices, '퍼센트': delta_percents}, index=names)
+    return df.code.values
 
 if __name__ == "__main__":
+    # get_stock_info()
     web_main()
+    # get_top_volume()
