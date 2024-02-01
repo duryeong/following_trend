@@ -185,5 +185,6 @@ def get_top_volume():
 
 if __name__ == "__main__":
     # get_stock_info()
+    st.set_page_config(page_title='following trend')
     web_main()
     # get_top_volume()

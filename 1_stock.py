@@ -91,4 +91,5 @@ def web_main():
 # def draw_fig():
 
 if __name__ == "__main__":
+    st.set_page_config(page_title='following trend')
     web_main()

@@ -90,4 +90,5 @@ def web_main():
 
 
 if __name__ == "__main__":
+    st.set_page_config(page_title='following trend')
     web_main()
