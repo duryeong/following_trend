@@ -49,14 +49,26 @@ def get_stock_info():
     df = df[['tickers', 'best_value', 'best_param']]
     return df.head(30)
 
+def check_buy(c):
+    if c.is_up.values[0] and not c.is_up.values[1]:
+        return True
+    return False
+
+def check_sell(c):
+    if c.is_up.values[1] and not c.is_up.values[0]:
+        return True
+    return False
+
 def web_main():
     stock_info = get_stock_info()
     st.title(f'Following Trend')
     st.subheader(f"anal_date : ({(pd.to_datetime('today')+pd.to_timedelta(9, unit='hour')).strftime('%Y-%m-%d %H:%M')})")
 
+    buy_list = []
+    sell_list = []
     last_is_up_list = []
     last_tab_list = []
-    with st.expander('sea all_data'):
+    with st.expander('see all_data'):
         with st.spinner(f'make stodk info '):
             tabs = st.tabs([f"{itab}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
             # with st.expander("all_data", False):
@@ -66,27 +78,44 @@ def web_main():
                     st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
                     candle = get_stock(c=stock_info.tickers.values[inum])
                     candle = make_idx(candle)
+                    t = stock_info.tickers.values[inum]
+                    if check_buy(candle):buy_list.append(t)
+                    if check_sell(candle):sell_list.append(t)
+
                     if candle.is_up.values[0]:
-                        last_tab_list.append(stock_info.tickers.values[inum])
+                        last_tab_list.append(t)
                         last_is_up_list.append(candle)
                     st.dataframe(candle, use_container_width=True)
 
     "---"
 
-    st.subheader(f"last up list length: {len(last_is_up_list)}")
-    try:
-        is_up_tabs = st.tabs([f"{itab}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
-        for inum, itab in enumerate(is_up_tabs):
-            with itab:
-                st.dataframe(last_is_up_list[inum], use_container_width=True)
-                # fig = mpf.figure(style='yahoo', figsize=(8, 6))
-                fig_df = get_stock_for_fig(last_tab_list[inum])
-                fig, ax = mpf.plot(fig_df, style='default', type='candle', title=f"{last_tab_list[inum]}", returnfig=True)
-                st.pyplot(fig)
-    except Exception as e:
-        pass
+    with st.expander('see 보유_data'):
+        st.subheader(f"last up list length: {len(last_is_up_list)}")
+        try:
+            is_up_tabs = st.tabs([f"{itab}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
+            for inum, itab in enumerate(is_up_tabs):
+                with itab:
+                    st.dataframe(last_is_up_list[inum], use_container_width=True)
+                    # fig = mpf.figure(style='yahoo', figsize=(8, 6))
+                    fig_df = get_stock_for_fig(last_tab_list[inum])
+                    fig, ax = mpf.plot(fig_df, style='default', type='candle', title=f"{last_tab_list[inum]}", returnfig=True)
+                    st.pyplot(fig)
+        except Exception as e:
+            pass
 
     "---"
+
+    st.subheader('buy_list')
+    try:
+        st.write(", ".join(buy_list))
+    except Exception as e:
+        pass
+    "---"
+    st.subheader('sell_list')
+    try:
+        st.write(", ".join(sell_list))
+    except Exception as e:
+        pass
 
 # def draw_fig():
 

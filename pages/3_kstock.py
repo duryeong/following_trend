@@ -11,6 +11,17 @@ import mplfinance as mpf
 from pykrx import stock
 import os
 
+
+def check_buy(c):
+    if c.is_up.values[0] and not c.is_up.values[1]:
+        return True
+    return False
+
+def check_sell(c):
+    if c.is_up.values[1] and not c.is_up.values[0]:
+        return True
+    return False
+
 def return_name(market):
     Market = []
     for ticker in market:
@@ -113,9 +124,11 @@ def web_main():
     st.title(f'Following Trend kstock')
     st.subheader(f"anal_date : ({(pd.to_datetime('today')+pd.to_timedelta(9, unit='hour')).strftime('%Y-%m-%d %H:%M')})")
 
+    buy_list = []
+    sell_list = []
     last_is_up_list = []
     last_tab_list = []
-    with st.expander('sea all_data'):
+    with st.expander('see all_data'):
         with st.spinner(f'make coin info '):
             tabs = st.tabs([f"{ntoname(kstock_info,itab)}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
             # with st.expander("all_data", False):
@@ -126,8 +139,11 @@ def web_main():
                         st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
                         candle = get_kstock(stock_info.tickers.values[inum])
                         candle = make_idx(candle)
+                        t = stock_info.tickers.values[inum]
+                        if check_buy(candle): buy_list.append(ntoname(kstock_info, t))
+                        if check_sell(candle): sell_list.append(ntoname(kstock_info, t))
                         if candle.is_up.values[0]:
-                            last_tab_list.append(stock_info.tickers.values[inum])
+                            last_tab_list.append(t)
                             last_is_up_list.append(candle)
                         st.dataframe(candle, use_container_width=True)
                     except Exception as e:
@@ -135,20 +151,32 @@ def web_main():
 
     "---"
 
-    st.subheader(f"last up list length: {len(last_is_up_list)}")
-    try:
-        is_up_tabs = st.tabs([f"{ntoname(kstock_info,itab)}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
-        for inum, itab in enumerate(is_up_tabs):
-            with itab:
-                st.dataframe(last_is_up_list[inum], use_container_width=True)
-                fig_df = get_kstock(last_tab_list[inum])
-                st.subheader(f"{ntoname(kstock_info, last_tab_list[inum])}")
-                fig, ax = mpf.plot(fig_df, style='default', type='candle', returnfig=True)
-                st.pyplot(fig)
-    except Exception as e:
-        pass
+    with st.expander('see 보유_data'):
+        st.subheader(f"last up list length: {len(last_is_up_list)}")
+        try:
+            is_up_tabs = st.tabs([f"{ntoname(kstock_info,itab)}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
+            for inum, itab in enumerate(is_up_tabs):
+                with itab:
+                    st.dataframe(last_is_up_list[inum], use_container_width=True)
+                    fig_df = get_kstock(last_tab_list[inum])
+                    st.subheader(f"{ntoname(kstock_info, last_tab_list[inum])}")
+                    fig, ax = mpf.plot(fig_df, style='default', type='candle', returnfig=True)
+                    st.pyplot(fig)
+        except Exception as e:
+            pass
 
     "---"
+    st.subheader('buy_list')
+    try:
+        st.write(", ".join(buy_list))
+    except Exception as e:
+        pass
+    "---"
+    st.subheader('sell_list')
+    try:
+        st.write(", ".join(sell_list))
+    except Exception as e:
+        pass
 
 def get_top_volume():
     url = 'http://finance.naver.com'
