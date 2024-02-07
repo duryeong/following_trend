@@ -122,7 +122,7 @@ def web_main():
         else:
             kstock_info = pd.read_pickle(fkstock_info)
     st.title(f'Following Trend kstock')
-    st.subheader(f"anal_date : ({(pd.to_datetime('today')+pd.to_timedelta(9, unit='hour')).strftime('%Y-%m-%d %H:%M')})")
+    st.subheader(f"anal_date : ({(pd.to_datetime('today')+pd.to_timedelta(9, unit='h')).strftime('%Y-%m-%d %H:%M')})")
 
     buy_list = []
     sell_list = []
