@@ -138,7 +138,8 @@ def web_main():
                         # st.write(f'{stock_info.tickers.values[inum]}')
                         st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
                         candle = get_kstock(stock_info.tickers.values[inum])
-                        candle = make_idx(candle)
+                        info = eval(stock_info['best_param'].values[inum])
+                        candle = make_idx(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
                         t = stock_info.tickers.values[inum]
                         if check_buy(candle): buy_list.append(ntoname(kstock_info, t))
                         if check_sell(candle): sell_list.append(ntoname(kstock_info, t))
