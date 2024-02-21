@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings('ignore')
 import hashlib
 import streamlit as st
 from requests import get

@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings('ignore')
 import streamlit as st
 import requests
 from bs4 import BeautifulSoup
