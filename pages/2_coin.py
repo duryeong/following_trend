@@ -73,7 +73,7 @@ def web_main():
     sell_list = []
     last_is_up_list = []
     last_tab_list = []
-    with st.expander('see all_data'):
+    with st.expander('see all_data', expanded=True):
         with st.spinner(f'make coin info '):
             tabs = st.tabs([f"{itab}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
             # with st.expander("all_data", False):
