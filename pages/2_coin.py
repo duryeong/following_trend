@@ -39,7 +39,7 @@ def check_sell(c):
 def get_coin(c='KRW-BTC'):
     stock_code = c
     # Yahoo Finance에서 주식 정보를 가져옵니다.
-    df = pyupbit.get_ohlcv(c, count=30*6)
+    df = pyupbit.get_ohlcv(c, count=365)
     df.columns = [ic.lower() for ic in list(df.columns)]
     df = df[['open', 'high', 'low', 'close']]
     return df
