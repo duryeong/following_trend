@@ -61,7 +61,7 @@ def get_stock_info():
     eth_df = df[df.tickers == 'KRW-ETH']
     btc_df = df[df.tickers == 'KRW-BTC']
     neth_df = df[df.tickers != 'KRW-ETH']
-    odf = pd.concat([eth_df, btc_df, neth_df.head(8)])
+    odf = pd.concat([eth_df, btc_df, neth_df.head(28)])
     return odf
 
 def web_main():
