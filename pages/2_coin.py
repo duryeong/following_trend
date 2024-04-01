@@ -87,7 +87,7 @@ def web_main():
                     t = stock_info.tickers.values[inum]
                     if check_buy(candle):buy_list.append(t)
                     if check_sell(candle):sell_list.append(t)
-                    if candle.is_up.values[0]:
+                    if candle.is_up.values[1]:
                         last_tab_list.append(t)
                         last_is_up_list.append(candle)
                     st.dataframe(candle, use_container_width=True)
