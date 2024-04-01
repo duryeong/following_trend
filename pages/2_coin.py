@@ -27,12 +27,12 @@ def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     return df
 
 def check_buy(c):
-    if c.is_up.values[0] and not c.is_up.values[1]:
+    if c.is_up.values[1] and not c.is_up.values[2]:
         return True
     return False
 
 def check_sell(c):
-    if c.is_up.values[1] and not c.is_up.values[0]:
+    if c.is_up.values[2] and not c.is_up.values[1]:
         return True
     return False
 
