@@ -100,11 +100,11 @@ def get_stock_info():
             tickers.append(idf.tickers)
             best_value.append(idf.best_value)
             best_param.append(idf.best_param)
-
     odf = pd.DataFrame()
     odf['tickers'] = tickers
     odf['best_value'] = best_value
     odf['best_param'] = best_param
+    odf = odf.dropna(axis=0)
     # return df.head(30)
     return odf
 
@@ -132,7 +132,7 @@ def web_main():
     last_tab_list = []
     with st.expander('see all_data'):
         with st.spinner(f'make coin info '):
-            tabs = st.tabs([f"{ntoname(kstock_info,itab)}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
+            tabs = st.tabs([f"{ntoname(kstock_info,stock_info.tickers.values[inum])}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
             # with st.expander("all_data", False):
             for inum, itab in enumerate(tabs):
                 with itab:
