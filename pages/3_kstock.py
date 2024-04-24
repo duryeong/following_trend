@@ -84,7 +84,7 @@ def get_stock(c='AAPL'):
     df = df[['open', 'high', 'low', 'close']]
     return df
 
-@st.cache_data
+# @st.cache_data
 def get_stock_info():
     target_codes = get_top_volume()
     df = pd.read_csv('kstock_anal.csv')
