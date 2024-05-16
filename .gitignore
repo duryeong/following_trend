@@ -161,3 +161,4 @@ cython_debug/
 
 *.yfinance.py
 zzz.pickle
+/coin_anal_v2.csv
