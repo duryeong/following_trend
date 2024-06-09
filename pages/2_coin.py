@@ -53,7 +53,7 @@ def get_stock(c='AAPL'):
     df = df[['open', 'high', 'low', 'close']]
     return df
 
-@st.cache_data
+#@st.cache_data
 def get_stock_info():
     df = pd.read_csv('coin_anal.csv')
     df = df.sort_values(by='best_value', ascending=False)
