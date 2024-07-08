@@ -8,17 +8,17 @@ import pyupbit
 import mplfinance as mpf
 
 def make_idx_rev(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
-    df[f'rsi{r1}'] = tb.rsi(df['close'], timeperiod=r1)
-    df[f'rsi{r1*2}'] = tb.rsi(df['close'], timeperiod=r1*2)
-    df[f'rsi{r1*3}'] = tb.rsi(df['close'], timeperiod=r1*3)
-    df[f'adx_{ad}'] = tb.adx(df['high'], df['low'], df['close'], timeperiod=ad)
+    df[f'rsi{r1}'] = tb.rsi(df['close'], length=r1)
+    df[f'rsi{r1*2}'] = tb.rsi(df['close'], length=r1*2)
+    df[f'rsi{r1*3}'] = tb.rsi(df['close'], length=r1*3)
+    df[f'adx_{ad}'] = tb.adx(df['high'], df['low'], df['close'], length=ad).iloc[:,0]
     df[f'mean{wmean}'] = df.close.rolling(window=wmean).mean()
 
     is_down = []
     for idf in df.iloc:
-        # is_up.append(idf.rsi7 > idf.rsi14 > idf.rsi21 and idf.adx > 20)
         is_down.append(idf[f'rsi{r1}'] < idf[f'rsi{r1*2}'] < idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf.close < idf[f'mean{wmean}'])
     df['is_down'] = is_down
+    df['pre_close'] = df['close'].shift(1)
     df['differ'] = (df['pre_close']-df['close'])/df['pre_close']*100
 
     df = df[['is_down', 'open', 'close', 'differ']]
@@ -26,12 +26,12 @@ def make_idx_rev(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     return df
 
 def check_buy(c):
-    if c.is_up.values[1] and not c.is_up.values[2]:
+    if c.is_down.values[1] and not c.is_down.values[2]:
         return True
     return False
 
 def check_sell(c):
-    if c.is_up.values[2] and not c.is_up.values[1]:
+    if c.is_down.values[2] and not c.is_down.values[1]:
         return True
     return False
 
@@ -52,7 +52,7 @@ def get_stock(c='AAPL'):
     df = df[['open', 'high', 'low', 'close']]
     return df
 
-@st.cache_data
+# @st.cache_data
 def get_stock_info():
     df = pd.read_csv('coin_anal_short.csv')
     df = df.sort_values(by='best_value', ascending=False)
@@ -70,7 +70,7 @@ def web_main():
 
     buy_list = []
     sell_list = []
-    last_is_up_list = []
+    last_is_down_list = []
     last_tab_list = []
     with st.expander('see all_data', expanded=True):
         with st.spinner(f'make coin info '):
@@ -86,21 +86,21 @@ def web_main():
                     t = stock_info.tickers.values[inum]
                     if check_buy(candle):buy_list.append(t)
                     if check_sell(candle):sell_list.append(t)
-                    if candle.is_up.values[1]:
+                    if candle.is_down.values[1]:
                         last_tab_list.append(t)
-                        last_is_up_list.append(candle)
+                        last_is_down_list.append(candle)
                     st.dataframe(candle, use_container_width=True)
 
     "---"
 
 
     with st.expander('see 보유_data'):
-        st.subheader(f"last up list length: {len(last_is_up_list)}")
+        st.subheader(f"last up list length: {len(last_is_down_list)}")
         try:
-            is_up_tabs = st.tabs([f"{itab}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
-            for inum, itab in enumerate(is_up_tabs):
+            is_down_tabs = st.tabs([f"{itab}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
+            for inum, itab in enumerate(is_down_tabs):
                 with itab:
-                    st.dataframe(last_is_up_list[inum], use_container_width=True)
+                    st.dataframe(last_is_down_list[inum], use_container_width=True)
                     fig_df = get_coin(last_tab_list[inum])
                     fig, ax = mpf.plot(fig_df, style='default', type='candle', title=f"{last_tab_list[inum]}", returnfig=True)
                     st.pyplot(fig)
