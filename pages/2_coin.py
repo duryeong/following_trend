@@ -65,6 +65,8 @@ def get_stock_info():
     return odf
 
 def web_main():
+    if st.button('rerun'):
+        st.rerun()
     stock_info = get_stock_info()
     st.title(f'Following Trend')
     st.subheader(f"anal_date : ({(pd.to_datetime('today')+pd.to_timedelta(9, unit='h')).strftime('%Y-%m-%d %H:%M')})")
