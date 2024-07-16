@@ -16,7 +16,8 @@ def make_idx_rev(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
 
     is_down = []
     for idf in df.iloc:
-        is_down.append(idf[f'rsi{r1}'] < idf[f'rsi{r1*2}'] < idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf.close < idf[f'mean{wmean}'])
+        is_down.append(idf[f'rsi{r1}'] < idf[f'rsi{r1*2}'] < idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and
+                       idf.close < idf[f'mean{wmean}'])
     df['is_down'] = is_down
     df['pre_close'] = df['close'].shift(1)
     df['differ'] = (df['pre_close']-df['close'])/df['pre_close']*100
