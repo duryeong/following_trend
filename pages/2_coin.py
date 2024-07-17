@@ -105,7 +105,7 @@ def web_main():
                 with itab:
                     st.dataframe(last_is_up_list[inum], use_container_width=True)
                     fig_df = get_coin(last_tab_list[inum])
-                    fig, ax = mpf.plot(fig_df, style='default', type='candle', title=f"{last_tab_list[inum]}", returnfig=True)
+                    fig, ax = mpf.plot(fig_df[-31:], style='default', type='candle', title=f"{last_tab_list[inum]}", returnfig=True)
                     st.pyplot(fig)
         except Exception as e:
             pass
