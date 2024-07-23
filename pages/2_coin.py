@@ -6,6 +6,7 @@ import yfinance as yf
 import pandas_ta as tb
 import pyupbit
 import mplfinance as mpf
+import numpy as np
 
 def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     df[f'rsi{r1*1}'] = tb.rsi(df['close'], length=r1*1)
@@ -82,10 +83,17 @@ def web_main():
             for inum, itab in enumerate(tabs):
                 with itab:
                     # st.write(f'{stock_info.tickers.values[inum]}')
-                    st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
+                    # st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
                     candle = get_coin(c=stock_info.tickers.values[inum])
                     info = eval(stock_info['best_param'].values[inum])
                     candle = make_idx(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
+
+                    candle['pre_isup'] = candle.is_up.shift(-1)
+                    candle['ror'] = (candle.differ + 100)/100
+                    dump_candle = candle[candle['pre_isup'] == True]['ror'][::-1].cumprod()
+                    st.subheader(f"Profit in the last year: {dump_candle.values[-1]*100:.2f}%")
+                    candle = candle[['is_up', 'open', 'close', 'differ']]
+
                     t = stock_info.tickers.values[inum]
                     if check_buy(candle):buy_list.append(t)
                     if check_sell(candle):sell_list.append(t)
@@ -93,6 +101,8 @@ def web_main():
                         last_tab_list.append(t)
                         last_is_up_list.append(candle)
                     st.dataframe(candle, use_container_width=True)
+                import gc
+                gc.collect()
 
     "---"
 
