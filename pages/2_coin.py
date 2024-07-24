@@ -79,9 +79,9 @@ def get_profit(candle):
 
     # Draw Down 계산 (누적 최대 값과 현재 hpr 차이 / 누적 최대값 * 100)
     df['dd'] = (df['hpr'].cummax() - df['hpr']) / df['hpr'].cummax() * 100
-    print(pd.to_datetime('today'))
-    print(df)
-    print(pd.to_datetime('today'))
+    # print(pd.to_datetime('today'))
+    # print(df)
+    # print(pd.to_datetime('today'))
     # print(df)
     return df
 
@@ -110,7 +110,7 @@ def web_main():
                     candle = make_idx(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
                     dump_df = get_profit(candle)
 
-                    st.subheader(f"Profit in the last year: {dump_df.hpr.values[-1]*100:.2f}%, MDD: {dump_df.dd.max():.2f}")
+                    st.subheader(f"Profit in the last year: {dump_df.hpr.values[-1]*100:.2f}%, MDD: {dump_df.dd.max():.2f}%")
                     candle = candle[['is_up', 'open', 'close', 'differ']]
 
                     t = stock_info.tickers.values[inum]
