@@ -159,6 +159,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-*.yfinance.py
+*.yfinance*.py
 zzz.pickle
 /coin_anal_v2.csv
