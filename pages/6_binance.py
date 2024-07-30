@@ -58,25 +58,25 @@ def make_idx(idf, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     df[f'adx_{ad}'] = tb.adx(df['high'], df['low'], df['close'], length=ad).iloc[:,0]
     df[f'mean{wmean}'] = df.close.rolling(window=wmean).mean()
 
-    is_up = []
+    is_long = []
     for idf in df.iloc:
-        # is_up.append(idf.rsi7 > idf.rsi14 > idf.rsi21 and idf.adx > 20)
-        is_up.append(idf[f'rsi{r1}'] > idf[f'rsi{r1*2}'] > idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf.close > idf[f'mean{wmean}'])
-    df['is_up'] = is_up
+        # is_long.append(idf.rsi7 > idf.rsi14 > idf.rsi21 and idf.adx > 20)
+        is_long.append(idf[f'rsi{r1}'] > idf[f'rsi{r1*2}'] > idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf.close > idf[f'mean{wmean}'])
+    df['is_long'] = is_long
     df['pre_close'] = df.close.shift(1)
     df['differ'] = (df['close']-df['pre_close'])/df['pre_close']*100
 
-    df = df[['is_up', 'open', 'close', 'differ']]
+    df = df[['is_long', 'open', 'close', 'differ']]
     df = df[::-1]
     return df
 
 def check_buy(c):
-    if c.is_up.values[1] and not c.is_up.values[2]:
+    if c.is_long.values[1] and not c.is_long.values[2]:
         return True
     return False
 
 def check_sell(c):
-    if c.is_up.values[2] and not c.is_up.values[1]:
+    if c.is_long.values[2] and not c.is_long.values[1]:
         return True
     return False
 
@@ -126,7 +126,7 @@ def get_stock_info():
 def get_profit(candle):
     import copy
     df = copy.deepcopy(candle[::-1])
-    df['pre_up'] = df.is_up.shift(1)
+    df['pre_up'] = df.is_long.shift(1)
     df['pre_close'] = df.close.shift(1)
 
     df['ror'] = (df.differ + 100) / 100
@@ -174,7 +174,7 @@ def web_main():
 
     buy_list = []
     sell_list = []
-    last_is_up_list = []
+    last_is_long_list = []
     last_tab_list = []
     with st.expander('see all_data', expanded=True):
         with st.spinner(f'make coin info '):
@@ -191,6 +191,11 @@ def web_main():
                     short_candle = make_idx_rev(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
                     short_dump_df = get_profit_short(short_candle)
                     long_candle['is_short'] = short_candle['is_down']
+                    long_candle = long_candle[['is_long', 'is_short', 'open',	'close', 'differ']]
+                    long_candle['is_long'][long_candle['is_long'] == True] = 'O'
+                    long_candle['is_long'][long_candle['is_long'] == False] = ''
+                    long_candle['is_short'][long_candle['is_short'] == True] = 'O'
+                    long_candle['is_short'][long_candle['is_short'] == False] = ''
                     st.table(long_candle)
                     st.subheader(f"Long Profit in the last year: {long_dump_df.hpr.values[-1]*100:.2f}%, MDD: {long_dump_df.dd.max():.2f}%")
                     st.subheader(f"Short Profit in the last year: {short_dump_df.hpr.values[-1]*100:.2f}%, MDD: {short_dump_df.dd.max():.2f}%")
