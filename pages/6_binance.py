@@ -191,7 +191,7 @@ def web_main():
                     short_candle = make_idx_rev(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
                     short_dump_df = get_profit_short(short_candle)
                     long_candle['is_short'] = short_candle['is_down']
-                    long_candle = long_candle[['is_long', 'is_short', 'open',	'close', 'differ']]
+                    long_candle = long_candle[['is_long', 'is_short', 'close', 'differ']]
                     long_candle['is_long'][long_candle['is_long'] == True] = 'O'
                     long_candle['is_long'][long_candle['is_long'] == False] = ''
                     long_candle['is_short'][long_candle['is_short'] == True] = 'O'
