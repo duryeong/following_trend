@@ -11,10 +11,9 @@ import ccxt
 
 def get_ohlcv_binance(symbol):
     # Binance 거래소 객체 생성
-    exchange = ccxt.binance()
+    exchange = ccxt.binanceus()
 
     # 심볼과 타임프레임 설정
-    symbol = 'BTC/USDT'  # 불러올 심볼 (예: BTC/USDT)
     timeframe = '1d'  # 타임프레임 (1일)
 
     # 캔들스틱 데이터 불러오기
