@@ -1,3 +1,3 @@
 ,tickers,best_value,best_param
-0,KRW-BTC,2.391393835815867,"{'r1': 11, 'ad': 75, 'limad': 4, 'wmean': 6}"
-1,KRW-ETH,2.3370711854933797,"{'r1': 9, 'ad': 100, 'limad': 10, 'wmean': 8}"
+0,KRW-ETH,2.9533893169500223,"{'r1': 7, 'ad': 29, 'limad': 15, 'wmean': 4}"
+1,KRW-BTC,2.391393835815867,"{'r1': 11, 'ad': 75, 'limad': 4, 'wmean': 6}"
