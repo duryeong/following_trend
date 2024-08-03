@@ -29,45 +29,31 @@ def get_ohlcv_binance(symbol):
     # 데이터 출력
     return df
 
-def make_idx_rev(idf, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
-    df = copy.deepcopy(idf)
-
+def calculate_indicators(df, r1, ad, wmean):
     df[f'rsi{r1}'] = tb.rsi(df['close'], length=r1)
-    df[f'rsi{r1*2}'] = tb.rsi(df['close'], length=r1*2)
-    df[f'rsi{r1*3}'] = tb.rsi(df['close'], length=r1*3)
-    df[f'adx_{ad}'] = tb.adx(df['high'], df['low'], df['close'], length=ad).iloc[:,0]
+    df[f'rsi{r1 * 2}'] = tb.rsi(df['close'], length=r1 * 2)
+    df[f'rsi{r1 * 3}'] = tb.rsi(df['close'], length=r1 * 3)
+    df[f'adx_{ad}'] = tb.adx(df['high'], df['low'], df['close'], length=ad).iloc[:, 0]
     df[f'mean{wmean}'] = df.close.rolling(window=wmean).mean()
 
-    is_down = []
-    for idf in df.iloc:
-        # is_up.append(idf.rsi7 > idf.rsi14 > idf.rsi21 and idf.adx > 20)
-        is_down.append(idf[f'rsi{r1}'] < idf[f'rsi{r1*2}'] < idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf.close < idf[f'mean{wmean}'])
-    df['is_down'] = is_down
-    df['pre_close'] = df.close.shift(1)
-    df['differ'] = (df['close']-df['pre_close'])/df['pre_close']*100
-    df = df[['is_down', 'open', 'close', 'differ']]
-    df = df[::-1]
+def make_idx_rev(idf, r1=7, ad=14, limad=12, wmean=4):
+    df = copy.deepcopy(idf)
+    calculate_indicators(df, r1, ad, wmean)
+    df['is_short'] = df.apply(lambda row: row[f'rsi{r1}'] < row[f'rsi{r1 * 2}'] < row[f'rsi{r1 * 3}']
+        and row[f'adx_{ad}'] > limad
+        and row.close < row[f'mean{wmean}'], axis=1)
+
     return df
-    # get_profig_rev(df)
+
 
 def make_idx(idf, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     df = copy.deepcopy(idf)
-    df[f'rsi{r1*1}'] = tb.rsi(df['close'], length=r1*1)
-    df[f'rsi{r1*2}'] = tb.rsi(df['close'], length=r1*2)
-    df[f'rsi{r1*3}'] = tb.rsi(df['close'], length=r1*3)
-    df[f'adx_{ad}'] = tb.adx(df['high'], df['low'], df['close'], length=ad).iloc[:,0]
-    df[f'mean{wmean}'] = df.close.rolling(window=wmean).mean()
+    calculate_indicators(df, r1, ad, wmean)
 
-    is_long = []
-    for idf in df.iloc:
-        # is_long.append(idf.rsi7 > idf.rsi14 > idf.rsi21 and idf.adx > 20)
-        is_long.append(idf[f'rsi{r1}'] > idf[f'rsi{r1*2}'] > idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf.close > idf[f'mean{wmean}'])
-    df['is_long'] = is_long
-    df['pre_close'] = df.close.shift(1)
-    df['differ'] = (df['close']-df['pre_close'])/df['pre_close']*100
+    df['is_long'] = df.apply(lambda row: row[f'rsi{r1}'] > row[f'rsi{r1 * 2}'] > row[f'rsi{r1 * 3}']
+       and row[f'adx_{ad}'] > limad
+       and row.close > row[f'mean{wmean}'], axis=1)
 
-    df = df[['is_long', 'open', 'close', 'differ']]
-    df = df[::-1]
     return df
 
 def check_buy(c):
@@ -129,7 +115,6 @@ def get_profit(candle):
     df['pre_up'] = df.is_long.shift(1)
     df['pre_close'] = df.close.shift(1)
 
-    df['ror'] = (df.differ + 100) / 100
     df['ror'] = np.where(df['pre_up'],
                          df['close'] / df['pre_close'],
                          1)
@@ -146,10 +131,9 @@ def get_profit(candle):
 def get_profit_short(candle):
     import copy
     df = copy.deepcopy(candle[::-1])
-    df['pre_down'] = df.is_down.shift(1)
+    df['pre_down'] = df.is_short.shift(1)
     df['pre_close'] = df.close.shift(1)
 
-    df['ror'] = (df.differ + 100) / 100
     df['ror'] = np.where(df['pre_down'],
                          df['pre_close'] / df['close'],
                          1)
@@ -188,15 +172,18 @@ def web_main():
                     info = eval(long_info['best_param'].values[inum])
                     long_candle = make_idx(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
                     long_dump_df = get_profit(long_candle)
+                    info = eval(short_info['best_param'].values[inum])
                     short_candle = make_idx_rev(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
                     short_dump_df = get_profit_short(short_candle)
-                    long_candle['is_short'] = short_candle['is_down']
+                    long_candle['is_short'] = short_candle['is_short']
+                    long_candle['pre_close'] = long_candle.close.shift(1)
+                    long_candle['differ'] = (long_candle.close/long_candle.pre_close-1)*100
                     long_candle = long_candle[['is_long', 'is_short', 'close', 'differ']]
                     long_candle['is_long'][long_candle['is_long'] == True] = 'O'
                     long_candle['is_long'][long_candle['is_long'] == False] = ''
                     long_candle['is_short'][long_candle['is_short'] == True] = 'O'
                     long_candle['is_short'][long_candle['is_short'] == False] = ''
-                    st.table(long_candle)
+                    st.table(long_candle[::-1])
                     st.subheader(f"Long Profit in the last year: {long_dump_df.hpr.values[-1]*100:.2f}%, MDD: {long_dump_df.dd.max():.2f}%")
                     st.subheader(f"Short Profit in the last year: {short_dump_df.hpr.values[-1]*100:.2f}%, MDD: {short_dump_df.dd.max():.2f}%")
 
