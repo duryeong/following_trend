@@ -107,7 +107,6 @@ def web_main():
                     # st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
                     candle = get_coin(c=stock_info.tickers.values[inum])
                     info = eval(stock_info['best_param'].values[inum])
-                    info = {'r1': 7, 'ad': 6, 'limad': 23, 'wmean': 4}
 
                     candle = make_idx(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
                     dump_df = get_profit(candle)
