@@ -1,6 +1,6 @@
 ,tickers,best_value,best_param
 0,KRW-BTC,2.331486191786771,"{'r1': 18, 'ad': 16, 'limad': 25, 'wmean': 5}"
-1,KRW-ETH,2.9533893169500223,"{'r1': 7, 'ad': 29, 'limad': 15, 'wmean': 4}"
+1,KRW-ETH,2.9533893169500223,"{'r1': 7, 'ad': 6, 'limad': 23, 'wmean': 4}"
 2,KRW-NEO,2.0661980499541346,"{'r1': 19, 'ad': 14, 'limad': 2, 'wmean': 4}"
 3,KRW-MTL,2.0984634687222923,"{'r1': 2, 'ad': 9, 'limad': 22, 'wmean': 4}"
 4,KRW-XRP,1.587623548734291,"{'r1': 20, 'ad': 6, 'limad': 14, 'wmean': 5}"
