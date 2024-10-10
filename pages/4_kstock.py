@@ -132,7 +132,7 @@ def web_main():
     last_tab_list = []
     with st.expander('see all_data'):
         with st.spinner(f'make coin info '):
-            tabs = st.tabs([f"{ntoname(kstock_info,stock_info.tickers.values[inum])}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
+            tabs = st.tabs([f"{stock_info.tickers.values[inum]}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
             # with st.expander("all_data", False):
             for inum, itab in enumerate(tabs):
                 with itab:
@@ -157,7 +157,7 @@ def web_main():
     with st.expander('see 보유_data'):
         st.subheader(f"last up list length: {len(last_is_up_list)}")
         try:
-            is_up_tabs = st.tabs([f"{ntoname(kstock_info,itab)}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
+            is_up_tabs = st.tabs([f"{itab}_{inum + 1:03d}" for inum, itab in enumerate(last_tab_list)])
             for inum, itab in enumerate(is_up_tabs):
                 with itab:
                     st.dataframe(last_is_up_list[inum], use_container_width=True)
