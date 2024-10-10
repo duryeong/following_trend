@@ -17,7 +17,7 @@ def get_ohlcv_binance(symbol):
     timeframe = '1h'  # 타임프레임 (1h)
 
     # 캔들스틱 데이터 불러오기
-    candles = exchange.fetch_ohlcv(symbol, timeframe, limit=200)
+    candles = exchange.fetch_ohlcv(symbol, timeframe, limit=2000)
 
     # 데이터 프레임으로 변환
     columns = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume']
