@@ -147,6 +147,53 @@ def get_profit_short(candle):
     # print(df)
     return df
 
+
+def calculate_mdd_for_each_position(df):
+    mdd_list = []  # 각 포지션의 MDD를 저장할 리스트
+    df['timestamp'] = df.index
+
+    peak = None
+    mdd = 0
+    is_in_position = False
+    start_position_index = None
+
+    for i, row in df.iterrows():
+        if row['O']:  # O 컬럼이 True일 때만 long 포지션으로 간주
+            if not is_in_position:
+                # 포지션 시작 (long 포지션 진입)
+                is_in_position = True
+                peak = row['close']  # 첫 진입 시의 가격을 peak으로 설정
+                start_position_index = i  # 포지션 시작 인덱스
+            else:
+                # 포지션이 활성화된 상태에서 peak과 drawdown 계산
+                peak = max(peak, row['close'])
+                drawdown = (peak - row['close']) / peak
+                mdd = max(mdd, drawdown)
+        else:
+            if is_in_position:
+                # 포지션 종료 시 해당 포지션의 MDD를 기록
+                mdd_list.append({
+                    'start': df.loc[start_position_index, 'timestamp'],
+                    'end': row['timestamp'],
+                    'mdd': mdd
+                })
+
+                # 포지션 초기화
+                is_in_position = False
+                mdd = 0
+                peak = None
+
+    # 마지막 포지션의 MDD 처리 (포지션이 끝나지 않았을 경우)
+    if is_in_position and start_position_index is not None:
+        mdd_list.append({
+            'start': df.loc[start_position_index, 'timestamp'],
+            'end': df.iloc[-1]['timestamp'],  # 마지막 날짜
+            'mdd': mdd
+        })
+
+    df = pd.DataFrame(mdd_list)
+    return mdd_list, df.mdd.max()*100
+
 def web_main():
     if st.button('rerun'):
         st.rerun()
@@ -183,7 +230,13 @@ def web_main():
                     long_candle['is_long'][long_candle['is_long'] == False] = ''
                     long_candle['is_short'][long_candle['is_short'] == True] = 'O'
                     long_candle['is_short'][long_candle['is_short'] == False] = ''
-                    st.table(long_candle[::-1])
+                    long_candle['O'] = long_candle['is_long'].shift(1)
+                    mdd_results, max_mdd = calculate_mdd_for_each_position(long_candle)
+                    # 결과 출력
+                    # for result in mdd_results:
+                    #     print(f"포지션 시작: {result['start']}, 포지션 종료: {result['end']}, MDD: {result['mdd'] * 100:.2f}%")
+                    st.subheader(f"max MDD: {max_mdd:.1f}%")
+                    st.table(long_candle[::-1][['is_long', 'close', 'differ']])
                     st.subheader(f"Long Profit in the last year: {long_dump_df.hpr.values[-1]*100:.2f}%, MDD: {long_dump_df.dd.max():.2f}%")
                     st.subheader(f"Short Profit in the last year: {short_dump_df.hpr.values[-1]*100:.2f}%, MDD: {short_dump_df.dd.max():.2f}%")
 
