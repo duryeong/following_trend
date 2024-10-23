@@ -284,9 +284,6 @@ def web_main():
                     min_return, total_return = calculate_returns_with_total(long_candle)
                     st.subheader(f"손실: {min_return:.2f}%, 전기간 수익: {total_return:.2f}%")
                     st.table(long_candle[::-1][['is_long', 'close', 'differ']])
-                    st.subheader(f"Long Profit in the last year: {long_dump_df.hpr.values[-1]*100:.2f}%, MDD: {long_dump_df.dd.max():.2f}%")
-                    st.subheader(f"Short Profit in the last year: {short_dump_df.hpr.values[-1]*100:.2f}%, MDD: {short_dump_df.dd.max():.2f}%")
-
                 import gc
                 gc.collect()
 
