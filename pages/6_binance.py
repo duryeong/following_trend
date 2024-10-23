@@ -148,6 +148,56 @@ def get_profit_short(candle):
     return df
 
 
+def calculate_returns_with_total(df):
+    df['timestamp'] = df.index
+    returns_list = []  # 각 포지션의 수익률을 저장할 리스트
+    cumulative_return = 1  # 전체 수익률을 계산하기 위한 변수 (복리 계산을 위한 초기값)
+
+    entry_price = None
+    is_in_position = False
+    start_position_index = None
+
+    for i, row in df.iterrows():
+        if row['O']:  # O 컬럼이 True일 때만 long 포지션으로 간주
+            if not is_in_position:
+                # 포지션 시작 (long 포지션 진입)
+                is_in_position = True
+                entry_price = row['close']  # 진입 시의 가격을 기록
+                start_position_index = i  # 포지션 시작 인덱스
+        else:
+            if is_in_position:
+                # 포지션 종료 시 해당 포지션의 수익률을 계산
+                exit_price = row['close']  # 청산 시의 가격
+                returns = (exit_price - entry_price) / entry_price  # 수익률 계산
+                returns_list.append({
+                    'start': df.loc[start_position_index, 'timestamp'],
+                    'end': row['timestamp'],
+                    'returns': returns
+                })
+                cumulative_return *= (1 + returns)  # 복리로 전체 수익률 계산
+
+                # 포지션 초기화
+                is_in_position = False
+                entry_price = None
+
+    # 마지막 포지션의 수익률 처리 (포지션이 끝나지 않았을 경우)
+    if is_in_position and start_position_index is not None:
+        exit_price = df.iloc[-1]['close']  # 마지막 날짜의 종가로 청산
+        returns = (exit_price - entry_price) / entry_price  # 수익률 계산
+        returns_list.append({
+            'start': df.loc[start_position_index, 'timestamp'],
+            'end': df.iloc[-1]['timestamp'],  # 마지막 날짜
+            'returns': returns
+        })
+        cumulative_return *= (1 + returns)  # 복리로 전체 수익률 계산
+
+    # 전체 수익률은 최종 cumulative_return 값에서 1을 빼서 반환 (예: 1.2 -> 20%)
+    total_return = cumulative_return - 1
+    df = pd.DataFrame(returns_list)
+    df['per'] = df.returns+1
+
+    return df.returns.min()*100, (df.per.cumprod().values[-1]-1)*100
+
 def calculate_mdd_for_each_position(df):
     mdd_list = []  # 각 포지션의 MDD를 저장할 리스트
     df['timestamp'] = df.index
@@ -231,11 +281,8 @@ def web_main():
                     long_candle['is_short'][long_candle['is_short'] == True] = 'O'
                     long_candle['is_short'][long_candle['is_short'] == False] = ''
                     long_candle['O'] = long_candle['is_long'].shift(1)
-                    mdd_results, max_mdd = calculate_mdd_for_each_position(long_candle)
-                    # 결과 출력
-                    # for result in mdd_results:
-                    #     print(f"포지션 시작: {result['start']}, 포지션 종료: {result['end']}, MDD: {result['mdd'] * 100:.2f}%")
-                    st.subheader(f"max MDD: {max_mdd:.1f}%")
+                    min_return, total_return = calculate_returns_with_total(long_candle)
+                    st.subheader(f"손실: {min_return:.2f}%, 전기간 수익: {total_return:.2f}%")
                     st.table(long_candle[::-1][['is_long', 'close', 'differ']])
                     st.subheader(f"Long Profit in the last year: {long_dump_df.hpr.values[-1]*100:.2f}%, MDD: {long_dump_df.dd.max():.2f}%")
                     st.subheader(f"Short Profit in the last year: {short_dump_df.hpr.values[-1]*100:.2f}%, MDD: {short_dump_df.dd.max():.2f}%")
