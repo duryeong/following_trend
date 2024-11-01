@@ -13,7 +13,7 @@ plt.rc('font', family='NanumGothic')  # 예: 나눔고딕 폰트 설정 (시스�
 st.set_page_config(page_title="BTC/USDT 실시간 캔들 차트", layout="wide")
 
 # Binance Exchange 객체 생성 (미국 접근용)
-exchange = ccxt.binanceusdm()  # 미국 사용자를 위한 binanceusdm API로 변경
+exchange = ccxt.binanceus()  # 미국 사용자를 위한 binanceusdm API로 변경
 
 
 # 데이터 가져오는 함수
