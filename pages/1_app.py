@@ -18,7 +18,7 @@ exchange = ccxt.binanceus()  # 미국 사용자를 위한 binanceusdm API로 변
 
 # 데이터 가져오는 함수
 def fetch_data():
-    ohlcv = exchange.fetch_ohlcv('BTC/USDT', timeframe='1m', limit=200)  # 최신 200개의 1분봉 데이터 가져오기
+    ohlcv = exchange.fetch_ohlcv('BTC/USDT', timeframe='1h', limit=200)  # 최신 200개의 1분봉 데이터 가져오기
     data = pd.DataFrame(ohlcv, columns=['Timestamp', 'open', 'high', 'low', 'close', 'volume'])
     data['Timestamp'] = pd.to_datetime(data['Timestamp'], unit='ms')
     data.set_index('Timestamp', inplace=True)
