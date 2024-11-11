@@ -6,18 +6,21 @@ import yfinance as yf
 import pandas_ta as tb
 import mplfinance as mpf
 
-def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
-    df[f'rsi{r1*1}'] = tb.rsi(df['close'], length=r1*1)
+
+def make_idx(df, r1=7, ad=14, limad=12, mc_ratio=1.01, wmean=4 ,iyear=None):
+    df[f'rsi{r1}'] = tb.rsi(df['close'], length=r1)
     df[f'rsi{r1*2}'] = tb.rsi(df['close'], length=r1*2)
     df[f'rsi{r1*3}'] = tb.rsi(df['close'], length=r1*3)
     df[f'adx_{ad}'] = tb.adx(df['high'], df['low'], df['close'], length=ad).iloc[:,0]
     df[f'mean{wmean}'] = df.close.rolling(window=wmean).mean()
+    df[f'mc_ratio_{mc_ratio}'] = df.close / df[f'mean{wmean}']
 
     is_up = []
     for idf in df.iloc:
         # is_up.append(idf.rsi7 > idf.rsi14 > idf.rsi21 and idf.adx > 20)
-        is_up.append(idf[f'rsi{r1}'] > idf[f'rsi{r1*2}'] > idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf.close > idf[f'mean{wmean}'])
+        is_up.append(idf[f'rsi{r1}'] > idf[f'rsi{r1*2}'] > idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf[f'mc_ratio_{mc_ratio}'] < mc_ratio and idf.close > idf[f'mean{wmean}'])
     df['is_up'] = is_up
+
     df['pre_close'] = df.close.shift(1)
     df['differ'] = (df['close']-df['pre_close'])/df['pre_close']*100
 
@@ -46,7 +49,7 @@ def get_stock(c='AAPL'):
 
 #@st.cache_data
 def get_stock_info():
-    df = pd.read_csv('yfinance_anal.csv')
+    df = pd.read_csv('yfinance_anal_v2.csv')
     df = df.sort_values(by='best_value', ascending=False)
     df = df[['tickers', 'best_value', 'best_param']]
     return df.head(30)
@@ -80,7 +83,7 @@ def web_main():
                     st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
                     candle = get_stock(c=stock_info.tickers.values[inum])
                     info = eval(stock_info['best_param'].values[inum])
-                    candle = make_idx(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
+                    candle = make_idx(candle, r1=info['r1'], ad=info['ad'], limad=info['limad'], wmean=info['wmean'])
                     t = stock_info.tickers.values[inum]
                     if check_buy(candle):buy_list.append(t)
                     if check_sell(candle):sell_list.append(t)
