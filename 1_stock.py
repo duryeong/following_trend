@@ -83,7 +83,7 @@ def web_main():
                     st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
                     candle = get_stock(c=stock_info.tickers.values[inum])
                     info = eval(stock_info['best_param'].values[inum])
-                    candle = make_idx(candle, r1=info['r1'], ad=info['ad'], limad=info['limad'], wmean=info['wmean'])
+                    candle = make_idx(candle, r1=info['r1'], ad=info['ad'], limad=info['limad'], mc_ratio=info['mc_ratio'], wmean=info['wmean'])
                     t = stock_info.tickers.values[inum]
                     if check_buy(candle):buy_list.append(t)
                     if check_sell(candle):sell_list.append(t)
