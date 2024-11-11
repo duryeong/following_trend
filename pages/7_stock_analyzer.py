@@ -32,7 +32,7 @@ def make_idx(df, r1=7, ad=14, limad=12, mc_ratio=1.01, wmean=4):
 
 @st.cache_data
 def load_stock_info():
-    return pd.read_csv('../yfinance_anal_v2.csv')
+    return pd.read_csv('yfinance_anal_v2.csv')
 
 def get_stock_recommendations(selected_date=None):
     try:
@@ -138,12 +138,12 @@ def main():
             st.dataframe(df_results, use_container_width=True)
             
             # CSV 다운로드 버튼
-            csv = df_results.to_csv(index=False)
-            st.download_button(
-                label="CSV 다운로드",
-                data=csv,
-                file_name="recommended_stocks.csv",
-                mime="text/csv"
+            # csv = df_results.to_csv(index=False)
+            # st.download_button(
+            #     label="CSV 다운로드",
+            #     data=csv,
+            #     file_name="recommended_stocks.csv",
+            #     mime="text/csv"
             )
         else:
             st.warning('추천 종목이 없습니다.')
