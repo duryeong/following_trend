@@ -144,7 +144,7 @@ def main():
             #     data=csv,
             #     file_name="recommended_stocks.csv",
             #     mime="text/csv"
-            )
+            # )
         else:
             st.warning('추천 종목이 없습니다.')
 
