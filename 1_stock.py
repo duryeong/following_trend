@@ -52,7 +52,7 @@ def get_stock_info():
     df = pd.read_csv('yfinance_anal_v2.csv')
     df = df.sort_values(by='best_value', ascending=False)
     df = df[['tickers', 'best_value', 'best_param']]
-    return df.head(50)
+    return df.head(30)
 
 def check_buy(c):
     if c.is_up.values[0] and not c.is_up.values[1]:
