@@ -7,6 +7,7 @@ import pandas_ta as tb
 import pyupbit
 import mplfinance as mpf
 import numpy as np
+import time
 
 def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
     df[f'rsi{r1*1}'] = tb.rsi(df['close'], length=r1*1)
