@@ -105,26 +105,30 @@ def web_main():
             # with st.expander("all_data", False):
             for inum, itab in enumerate(tabs):
                 with itab:
-                    # st.write(f'{stock_info.tickers.values[inum]}')
-                    # st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
-                    candle = get_coin(c=stock_info.tickers.values[inum])
-                    info = eval(stock_info['best_param'].values[inum])
+                    try:
+                        # st.write(f'{stock_info.tickers.values[inum]}')
+                        # st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
+                        candle = get_coin(c=stock_info.tickers.values[inum])
+                        info = eval(stock_info['best_param'].values[inum])
 
-                    candle = make_idx(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
-                    dump_df = get_profit(candle)
+                        candle = make_idx(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
+                        dump_df = get_profit(candle)
 
-                    st.subheader(f"Profit in the last year: {dump_df.hpr.values[-1]*100:.2f}%, MDD: {dump_df.dd.max():.2f}%")
-                    candle = candle[['is_up', 'open', 'close', 'differ']]
+                        st.subheader(f"Profit in the last year: {dump_df.hpr.values[-1]*100:.2f}%, MDD: {dump_df.dd.max():.2f}%")
+                        candle = candle[['is_up', 'open', 'close', 'differ']]
 
-                    t = stock_info.tickers.values[inum]
-                    if check_buy(candle):buy_list.append(t)
-                    if check_sell(candle):sell_list.append(t)
-                    if candle.is_up.values[1]:
-                        last_tab_list.append(t)
-                        last_is_up_list.append(candle)
-                    st.dataframe(candle, use_container_width=True)
-                import gc
-                gc.collect()
+                        t = stock_info.tickers.values[inum]
+                        if check_buy(candle):buy_list.append(t)
+                        if check_sell(candle):sell_list.append(t)
+                        if candle.is_up.values[1]:
+                            last_tab_list.append(t)
+                            last_is_up_list.append(candle)
+                        st.dataframe(candle, use_container_width=True)
+                    except Exception as e:
+                        pass
+                    finally:
+                        import gc
+                        gc.collect()
 
     "---"
 
