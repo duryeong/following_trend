@@ -3,6 +3,7 @@ import pandas as pd
 import yfinance as yf
 import pandas_ta as tb
 from datetime import datetime, timedelta
+import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -28,6 +29,9 @@ def make_idx(df, r1=7, ad=14, limad=12, mc_ratio=1.01, wmean=4):
         return df
     except Exception as e:
         st.error(f"지표 계산 중 오류: {str(e)}")
+        print(f"상세 오류 정보:\n{type(e).__name__}: {str(e)}")
+        import traceback
+        print(f"스택 트레이스:\n{traceback.format_exc()}")
         return None
 
 @st.cache_data
@@ -55,7 +59,7 @@ def get_stock_recommendations(selected_date=None):
                 
                 # 주식 데이터 가져오기 (타임아웃 설정)
                 stock = yf.Ticker(ticker)
-                df = stock.history(period="1y")  # 최근 1개월 데이터
+                df = stock.history(period="1y")  # 최근 1년 데이터
                 
                 if df.empty:
                     continue
@@ -79,16 +83,17 @@ def get_stock_recommendations(selected_date=None):
                     
                     if not valid_data.empty:
                         last_date = valid_data.index[-1]
-                        if valid_data.loc[last_date, 'is_up']:
+                        pre_last_date = valid_data.index[-2]
+                        if valid_data.loc[last_date, 'is_up'] or valid_data.loc[pre_last_date, 'is_up']:
                             # 현재 상승 구간의 시작점 찾기
-                            current_period = valid_data
                             period_start = None
-                            for i in range(len(current_period)-1, -1, -1):
-                                if not current_period.iloc[i]['is_up']:
-                                    period_start = current_period.index[i+1]
-                                    break
-                            if period_start is None:
-                                period_start = current_period.index[0]
+                            false_indices = np.where(~valid_data['is_up'])[0]
+                            last_false_idx = -1
+                            if len(false_indices) > 0:
+                                last_false_idx = false_indices[-1] + 1
+                                if false_indices[-1] == len(valid_data) - 1:
+                                    last_false_idx = false_indices[-2] + 1
+                            period_start = valid_data.index[last_false_idx]
                             
                             # 수익률 계산
                             start_price = valid_data.loc[period_start, 'close']
@@ -99,20 +104,21 @@ def get_stock_recommendations(selected_date=None):
                                 'ticker': ticker,
                                 'close': valid_data.loc[last_date, 'close'],
                                 'date': last_date.date(),
+                                'is_up':valid_data.loc[last_date, 'is_up'],
                                 'returns': round(returns, 2)
                             })
                 else:
                     # 최신 데이터 처리도 동일한 방식으로 수정
-                    target_date = df.index[-1]
-                    if df.loc[target_date, 'is_up']:
+                    if df['is_up'].values[-1] or df['is_up'].values[-2]:
                         current_period = df
                         period_start = None
-                        for i in range(len(current_period)-1, -1, -1):
-                            if not current_period.iloc[i]['is_up']:
-                                period_start = current_period.index[i+1]
-                                break
-                        if period_start is None:
-                            period_start = current_period.index[0]
+                        false_indices = np.where(~current_period['is_up'])[0]
+                        last_false_idx = -1
+                        if len(false_indices) > 0:
+                            last_false_idx = false_indices[-1] + 1
+                            if false_indices[-1] == len(current_period) - 1:
+                                last_false_idx = false_indices[-2]  + 1
+                        period_start = current_period.index[last_false_idx]
                             
                         start_price = df.loc[period_start, 'close']
                         end_price = df.loc[target_date, 'close']
@@ -122,11 +128,15 @@ def get_stock_recommendations(selected_date=None):
                             'ticker': ticker,
                             'close': df.loc[target_date, 'close'],
                             'date': target_date.date(),
+                            'is_up': df.loc[target_date, 'is_up'],
                             'returns': round(returns, 2)
                         })
                 
             except Exception as e:
                 st.warning(f"{ticker} 처리 중 오류: {str(e)}")
+                print(f"종목 {ticker} 처리 중 상세 오류:\n{type(e).__name__}: {str(e)}")
+                import traceback
+                print(f"스택 트레이스:\n{traceback.format_exc()}")
                 continue
         
         progress_bar.empty()
@@ -135,6 +145,9 @@ def get_stock_recommendations(selected_date=None):
         
     except Exception as e:
         st.error(f"추천 종목 분석 중 오류: {str(e)}")
+        print(f"상세 오류 정보:\n{type(e).__name__}: {str(e)}")
+        import traceback
+        print(f"스택 트레이스:\n{traceback.format_exc()}")
         return []
 
 def main():
@@ -196,9 +209,9 @@ def main():
             # 결과를 데이터프레임으로 변환
             df_results = pd.DataFrame(recommended_stocks)
             df_results['close'] = df_results['close'].round(2)
-            df_results.columns = ['종목코드', '종가', '기준일', '수익률(%)']
+            df_results.columns = ['종목코드', '종가', '기준일', 'is_up', '수익률(%)']
             df_results.set_index('종목코드', inplace=True)
-            df_results = df_results[['종가', '기준일', '수익률(%)']]
+            df_results = df_results[['종가', '기준일', 'is_up', '수익률(%)']]
             
             # 결과 표시 - index=False 추가
             st.dataframe(df_results, use_container_width=True)
