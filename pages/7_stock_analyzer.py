@@ -71,31 +71,58 @@ def get_stock_recommendations(selected_date=None):
                 
                 # 날짜 처리 수정
                 if selected_date:
-                    target_date = pd.Timestamp(selected_date).tz_localize('UTC')
-                    # 주말인 경우 이전 금요일로 조정
-                    while target_date.weekday() > 4:
-                        target_date -= pd.Timedelta(days=1)
-                    
-                    # DataFrame의 인덱스를 UTC로 변환
+                    target_date = pd.Timestamp(selected_date).tz_localize('UTC') + pd.Timedelta(9, unit='h')
                     df.index = df.index.tz_convert('UTC')
-                    valid_dates = df[df.index <= target_date]
                     
-                    if not valid_dates.empty:
-                        last_date = valid_dates.index[-1]
-                        if valid_dates.loc[last_date, 'is_up']:
+                    # 선택된 날짜 이하의 데이터만 필터링
+                    valid_data = df[df.index <= target_date]
+                    
+                    if not valid_data.empty:
+                        last_date = valid_data.index[-1]
+                        if valid_data.loc[last_date, 'is_up']:
+                            # 현재 상승 구간의 시작점 찾기
+                            current_period = valid_data
+                            period_start = None
+                            for i in range(len(current_period)-1, -1, -1):
+                                if not current_period.iloc[i]['is_up']:
+                                    period_start = current_period.index[i+1]
+                                    break
+                            if period_start is None:
+                                period_start = current_period.index[0]
+                            
+                            # 수익률 계산
+                            start_price = valid_data.loc[period_start, 'close']
+                            end_price = valid_data.loc[last_date, 'close']
+                            returns = ((end_price - start_price) / start_price) * 100
+                            
                             recommended_stocks.append({
                                 'ticker': ticker,
-                                'close': df.loc[last_date, 'close'],
-                                'date': last_date.date()
+                                'close': valid_data.loc[last_date, 'close'],
+                                'date': last_date.date(),
+                                'returns': round(returns, 2)
                             })
                 else:
-                    # 최신 데이터만 확인
+                    # 최신 데이터 처리도 동일한 방식으로 수정
                     target_date = df.index[-1]
                     if df.loc[target_date, 'is_up']:
+                        current_period = df
+                        period_start = None
+                        for i in range(len(current_period)-1, -1, -1):
+                            if not current_period.iloc[i]['is_up']:
+                                period_start = current_period.index[i+1]
+                                break
+                        if period_start is None:
+                            period_start = current_period.index[0]
+                            
+                        start_price = df.loc[period_start, 'close']
+                        end_price = df.loc[target_date, 'close']
+                        returns = ((end_price - start_price) / start_price) * 100
+                        
                         recommended_stocks.append({
                             'ticker': ticker,
                             'close': df.loc[target_date, 'close'],
-                            'date': target_date.date()
+                            'date': target_date.date(),
+                            'returns': round(returns, 2)
                         })
                 
             except Exception as e:
@@ -117,7 +144,7 @@ def main():
     if 'selected_date' not in st.session_state:
         st.session_state.selected_date = datetime.now().date()
     
-    col1, col2, col3 = st.columns([2, 1, 1])
+    col1, col2, col3 = st.columns([2, 2, 1])
     
     with col1:
         selected_date = st.date_input(
@@ -128,13 +155,22 @@ def main():
         st.session_state.selected_date = selected_date
     
     with col2:
-        if st.button("◀ 이전날"):
-            if st.session_state.selected_date:
-                new_date = st.session_state.selected_date - timedelta(days=1)
-                while new_date.weekday() > 4:
-                    new_date = new_date - timedelta(days=1)
-                st.session_state.selected_date = new_date
-                st.rerun()  # 페이지 리로드
+        col2_1, col2_2 = st.columns(2)
+        with col2_1:
+            if st.button("◀ 이전날"):
+                if st.session_state.selected_date:
+                    new_date = st.session_state.selected_date - timedelta(days=1)
+                    while new_date.weekday() > 4:
+                        new_date = new_date - timedelta(days=1)
+                    st.session_state.selected_date = new_date
+                    st.rerun()
+        with col2_2:
+            if st.button("금일"):
+                today = datetime.now().date()
+                while today.weekday() > 4:  # 주말인 경우 직전 금요일로 설정
+                    today -= timedelta(days=1)
+                st.session_state.selected_date = today
+                st.rerun()
     
     with col3:
         if st.button("다음날 ▶"):
@@ -143,7 +179,7 @@ def main():
                 while new_date.weekday() > 4:
                     new_date = new_date + timedelta(days=1)
                 st.session_state.selected_date = new_date
-                st.rerun()  # 페이지 리로드
+                st.rerun()
     
     # session_state에서 날짜 가져오기
     if 'selected_date' in st.session_state:
@@ -160,9 +196,9 @@ def main():
             # 결과를 데이터프레임으로 변환
             df_results = pd.DataFrame(recommended_stocks)
             df_results['close'] = df_results['close'].round(2)
-            df_results.columns = ['종목코드', '종가', '기준일']
+            df_results.columns = ['종목코드', '종가', '기준일', '수익률(%)']
             df_results.set_index('종목코드', inplace=True)
-            df_results = df_results[['종가', '기준일']]
+            df_results = df_results[['종가', '기준일', '수익률(%)']]
             
             # 결과 표시 - index=False 추가
             st.dataframe(df_results, use_container_width=True)
