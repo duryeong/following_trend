@@ -7,32 +7,24 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
-def make_idx(df, r1=7, ad=14, limad=12, mc_ratio=1.01, wmean=4):
-    try:
-        if df is None or df.empty:
-            return None
-            
-        df[f'rsi{r1}'] = tb.rsi(df['close'], length=r1)
-        df[f'rsi{r1*2}'] = tb.rsi(df['close'], length=r1*2)
-        df[f'rsi{r1*3}'] = tb.rsi(df['close'], length=r1*3)
-        df[f'adx_{ad}'] = tb.adx(df['high'], df['low'], df['close'], length=ad).iloc[:,0]
-        df[f'mean{wmean}'] = df.close.rolling(window=wmean).mean()
-        df[f'mc_ratio_{mc_ratio}'] = df.close / df[f'mean{wmean}']
-        
-        is_up = []
-        for idf in df.iloc:
-            is_up.append(idf[f'rsi{r1}'] > idf[f'rsi{r1*2}'] > idf[f'rsi{r1*3}'] and 
-                        idf[f'adx_{ad}'] > limad and 
-                        idf[f'mc_ratio_{mc_ratio}'] < mc_ratio and 
-                        idf.close > idf[f'mean{wmean}'])
-        df['is_up'] = is_up
-        return df
-    except Exception as e:
-        st.error(f"지표 계산 중 오류: {str(e)}")
-        print(f"상세 오류 정보:\n{type(e).__name__}: {str(e)}")
-        import traceback
-        print(f"스택 트레이스:\n{traceback.format_exc()}")
-        return None
+def make_idx(df, r1=7, ad=14, limad=12, mc_ratio=1.01, wmean=4 ,iyear=None):
+    df[f'rsi{r1}'] = tb.rsi(df['close'], length=r1)
+    df[f'rsi{r1*2}'] = tb.rsi(df['close'], length=r1*2)
+    df[f'rsi{r1*3}'] = tb.rsi(df['close'], length=r1*3)
+    df[f'adx_{ad}'] = tb.adx(df['high'], df['low'], df['close'], length=ad).iloc[:,0]
+    df[f'mean{wmean}'] = df.close.rolling(window=wmean).mean()
+    df[f'mc_ratio_{mc_ratio}'] = df.close / df[f'mean{wmean}']
+
+    is_up = []
+    for idf in df.iloc:
+        # is_up.append(idf.rsi7 > idf.rsi14 > idf.rsi21 and idf.adx > 20)
+        is_up.append(idf[f'rsi{r1}'] > idf[f'rsi{r1*2}'] > idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf[f'mc_ratio_{mc_ratio}'] < mc_ratio and idf.close > idf[f'mean{wmean}'])
+    df['is_up'] = is_up
+
+    df['pre_close'] = df.close.shift(1)
+    df['differ'] = (df['close']-df['pre_close'])/df['pre_close']*100
+
+    return df
 
 @st.cache_data
 def load_stock_info():
@@ -58,8 +50,12 @@ def get_stock_recommendations(selected_date=None):
                 progress_bar.progress((idx + 1) / total_stocks)
                 
                 # 주식 데이터 가져오기 (타임아웃 설정)
-                stock = yf.Ticker(ticker)
-                df = stock.history(period="1y")  # 최근 1년 데이터
+                # stock = yf.Ticker(ticker)
+                # df = stock.history(period="1y")  # 최근 1년 데이터
+                stock_data = yf.Ticker(ticker)
+                df = stock_data.history(interval='1d', period='6mo')
+                df.columns = [ic.lower() for ic in list(df.columns)]
+                df = df[['open', 'high', 'low', 'close']]
                 
                 if df.empty:
                     continue
@@ -68,7 +64,8 @@ def get_stock_recommendations(selected_date=None):
                 
                 # 파라미터 적용하여 지표 계산
                 params = eval(row['best_param'])
-                df = make_idx(df, **params)
+                df = make_idx(df, r1=params['r1'], ad=params['ad'], limad=params['limad'], mc_ratio=params['mc_ratio'], wmean=params['wmean'])
+
                 
                 if df is None:
                     continue
