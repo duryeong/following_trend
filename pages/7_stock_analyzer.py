@@ -210,6 +210,10 @@ def main():
             df_results.set_index('종목코드', inplace=True)
             df_results = df_results[['종가', '기준일', 'is_up', '수익률(%)']]
             
+            # 평균 수익률 계산
+            average_returns = df_results['수익률(%)'].mean()
+            st.subheader(f'평균 수익률: {average_returns:.2f}%')  # 평균 수익률 서브타이틀로 출력
+
             # 결과 표시 - index=False 추가
             st.dataframe(df_results, use_container_width=True)
             
@@ -225,7 +229,7 @@ def main():
             st.warning('추천 종목이 없습니다.')
 
     # 디버깅을 위한 세션 상태 출력
-    st.write("현재 선택된 날짜:", st.session_state.selected_date)
+    # st.write("현재 선택된 날짜:", st.session_state.selected_date)
 
 if __name__ == "__main__":
     main() 
