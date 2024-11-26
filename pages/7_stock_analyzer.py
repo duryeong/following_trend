@@ -211,7 +211,7 @@ def main():
             df_results = df_results[['종가', '기준일', 'is_up', '수익률(%)']]
             
             # 평균 수익률 계산
-            if len(df_results[df_results.is_up == False]) > 1:
+            if len(df_results[df_results.is_up == False]) > 0:
                 average_returns = df_results[df_results.is_up == False]['수익률(%)'].mean()
             else:
                 average_returns = np.nan
