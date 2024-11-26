@@ -1,0 +1,31 @@
+,tickers,best_value,best_param
+0,BTC/USDT,1.4958930536690325,"{'r1': 8, 'ad': 22, 'limad': 17, 'wmean': 12, 'mc_ratio': 1.17}"
+1,ETH/USDT,1.4090284707354959,"{'r1': 6, 'ad': 24, 'limad': 14, 'wmean': 11, 'mc_ratio': 1.05}"
+2,USDC/USDT,1.0,"{'r1': 15, 'ad': 24, 'limad': 15, 'wmean': 6, 'mc_ratio': 1.3}"
+3,DOGE/USDT,2.198042657369984,"{'r1': 11, 'ad': 21, 'limad': 5, 'wmean': 6, 'mc_ratio': 1.04}"
+4,XRP/USDT,1.9097287700196857,"{'r1': 6, 'ad': 27, 'limad': 11, 'wmean': 8, 'mc_ratio': 1.16}"
+5,SOL/USDT,4.007592013016188,"{'r1': 15, 'ad': 7, 'limad': 13, 'wmean': 7, 'mc_ratio': 1.17}"
+6,FDUSD/USDT,,
+7,PEPE/USDT,,
+8,XLM/USDT,1.957707358712954,"{'r1': 9, 'ad': 9, 'limad': 9, 'wmean': 3, 'mc_ratio': 1.03}"
+9,PNUT/USDT,,
+10,BNB/USDT,1.219710335514446,"{'r1': 5, 'ad': 26, 'limad': 11, 'wmean': 6, 'mc_ratio': 1.02}"
+11,ADA/USDT,1.603378571526733,"{'r1': 13, 'ad': 15, 'limad': 4, 'wmean': 12, 'mc_ratio': 1.12}"
+12,AVAX/USDT,2.7975786345423916,"{'r1': 11, 'ad': 27, 'limad': 10, 'wmean': 5, 'mc_ratio': 1.05}"
+13,WIF/USDT,,
+14,SAND/USDT,1.8277275157665962,"{'r1': 5, 'ad': 26, 'limad': 19, 'wmean': 7, 'mc_ratio': 1.04}"
+15,SUI/USDT,,
+16,ARB/USDT,,
+17,SEI/USDT,,
+18,WLD/USDT,,
+19,TIA/USDT,,
+20,SHIB/USDT,1.5508701474225366,"{'r1': 11, 'ad': 25, 'limad': 12, 'wmean': 6, 'mc_ratio': 1.04}"
+21,NEIRO/USDT,,
+22,BONK/USDT,,
+23,TRX/USDT,1.8424563201557271,"{'r1': 12, 'ad': 19, 'limad': 2, 'wmean': 11, 'mc_ratio': 1.04}"
+24,DOT/USDT,1.6215961379990513,"{'r1': 10, 'ad': 23, 'limad': 15, 'wmean': 12, 'mc_ratio': 1.09}"
+25,FTM/USDT,2.0920922829575743,"{'r1': 14, 'ad': 22, 'limad': 20, 'wmean': 12, 'mc_ratio': 1.18}"
+26,LINK/USDT,2.122775215178829,"{'r1': 15, 'ad': 28, 'limad': 13, 'wmean': 9, 'mc_ratio': 1.85}"
+27,ENS/USDT,1.564132169836901,"{'r1': 8, 'ad': 22, 'limad': 5, 'wmean': 12, 'mc_ratio': 1.06}"
+28,NEAR/USDT,1.5639590316311138,"{'r1': 12, 'ad': 30, 'limad': 18, 'wmean': 11, 'mc_ratio': 1.18}"
+29,UNI/USDT,1.8457888334553756,"{'r1': 6, 'ad': 30, 'limad': 15, 'wmean': 6, 'mc_ratio': 1.04}"
