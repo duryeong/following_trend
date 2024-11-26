@@ -100,10 +100,14 @@ def web_main():
     last_is_up_list = []
     last_tab_list = []
     with st.expander('see all_data', expanded=True):
+        progress_bar = st.progress(0)
+        status_text = st.empty()
         with st.spinner(f'make coin info '):
             tabs = st.tabs([f"{itab}_{inum+1:03d}" for inum, itab in enumerate(stock_info.tickers.values)])
             # with st.expander("all_data", False):
             for inum, itab in enumerate(tabs):
+                status_text.text(f'분석 중: {stock_info.tickers.values[inum]} ({inum+1}/{len(tabs)})')
+                progress_bar.progress((inum + 1) / len(tabs))
                 with itab:
                     try:
                         # st.write(f'{stock_info.tickers.values[inum]}')
