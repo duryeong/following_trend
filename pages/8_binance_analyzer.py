@@ -101,7 +101,7 @@ def get_binance_recommendations(selected_date=None):
                                     last_false_idx = false_indices[-2] + 1
                             period_start = valid_data.index[last_false_idx]
                             
-                            # 수익률 계산
+                            # 수익 계산
                             start_price = valid_data.loc[period_start, 'close']
                             end_price = valid_data.loc[last_date, 'close']
                             returns = ((end_price - start_price) / start_price) * 100
@@ -215,16 +215,16 @@ def main():
             # 결과를 데이터프레임으로 변환
             df_results = pd.DataFrame(recommended_binances)
             df_results['close'] = df_results['close'].round(2)
-            df_results.columns = ['종목코드', '종가', '기준일', 'is_up', '수익률(%)']
+            df_results.columns = ['종목코드', '종가', '기준일', 'is_up', '수익(W)']
             df_results.set_index('종목코드', inplace=True)
-            df_results = df_results[['종가', '기준일', 'is_up', '수익률(%)']]
+            df_results = df_results[['종가', '기준일', 'is_up', '수익(W)']]
             
-            # 평균 수익률 계산
+            # 평균 수익 계산
             if len(df_results[df_results.is_up == False]) > 0:
-                average_returns = df_results[df_results.is_up == False]['수익률(%)'].mean()
+                average_returns = df_results[df_results.is_up == False]['수익(W)'].sum()
             else:
                 average_returns = np.nan
-            st.subheader(f'평균 수익률: {average_returns:.2f}%')  # 평균 수익률 서브타이틀로 출력
+            st.subheader(f'100만원 수익: {average_returns:.2f}%')  # 평균 수익 서브타이틀로 출력
 
             # 결과 표시 - index=False 추가
             st.dataframe(df_results, use_container_width=True)
