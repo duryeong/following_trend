@@ -42,7 +42,7 @@ def load_upbit_info():
     n_df = n_df[n_df.tickers != 'KRW-BTC']
     n_df = n_df.sort_values(by='best_value', ascending=False)
 
-    return pd.concat([eth_df, btc_df, n_df])
+    return pd.concat([btc_df, n_df])
 def get_upbit_recommendations(selected_date=None, upbit_dict=None):
     try:
         upbit_info = load_upbit_info()
