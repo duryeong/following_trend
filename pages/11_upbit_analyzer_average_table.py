@@ -11,7 +11,7 @@ import time
 import concurrent.futures  # 병렬 처리를 위한 모듈 추가
 import streamlit as st  # streamlit 라이브러리 추가
 
-top = 2
+top = 1
 total_m = 1000
 
 def make_idx(df, r1=7, ad=14, limad=12, mc_ratio=100.01, wmean=4 ,iyear=None):
