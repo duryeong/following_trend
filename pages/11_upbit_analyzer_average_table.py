@@ -43,97 +43,6 @@ def load_upbit_info():
     n_df = n_df.sort_values(by='best_value', ascending=False)
 
     return pd.concat([btc_df, n_df])
-def get_upbit_recommendations(selected_date=None, upbit_dict=None):
-    try:
-        upbit_info = load_upbit_info()
-        upbit_info = upbit_info.head(top)
-        
-        recommended_upbits = []
-        
-        for idx, (_, row) in enumerate(upbit_info.iterrows()):
-            ticker = row['tickers']
-            if row['best_param'] is None: continue
-            try:
-                if ticker in upbit_dict:
-                    df = upbit_dict[ticker]
-                else:
-                    continue
-                
-                if df.empty:
-                    continue
-                
-                # 파라미터 적용하여 지표 계산
-                params = eval(row['best_param'])
-                df = make_idx(df, r1=params['r1'], ad=params['ad'], limad=params['limad'], mc_ratio=params['mc_ratio'], wmean=params['wmean'])
-
-                if df is None:
-                    continue
-                
-                # 날짜 처리 수정
-                if selected_date:
-                    target_date = pd.to_datetime(selected_date) + pd.Timedelta(9, unit='h')
-                    df.index = pd.to_datetime(df.index)
-                    
-                    # 선택된 날짜 이하의 데이터만 필터링
-                    valid_data = df[df.index <= target_date]
-                    
-                    returns = np.nan
-                    if len(valid_data) < 2:
-                        continue
-                    if not valid_data.is_up.values[-1] and valid_data.is_up.values[-2]:
-                        # 역으로 탐색하여 is_up이 True에서 False로 바뀌는 부분 찾기
-                        for i in range(len(valid_data) - 1, 0, -1):
-                            if valid_data.is_up.values[i] == True and valid_data.is_up.values[i - 1] == False:
-                                # 해당 인덱스에서의 처리
-                                # print(f"변화 발생: {valid_data.index[i]}에서 is_up이 False로 변경됨")
-                                # print(valid_data.is_up.values[i])
-                                # print(valid_data.is_up.values[i - 1])
-                                returns = (valid_data.close.values[-1]/valid_data.close.values[i]-1)*100
-                                break
-
-                    recommended_upbits.append({
-                        'ticker': ticker,
-                        'close': valid_data.close.values[-1],
-                        'date': target_date.date(),
-                        'is_up': valid_data.is_up.values[-1],
-                        'returns': round(returns, 2)
-                    })
-                
-            except Exception as e:
-                print(f"종목 {ticker} 처리 중 상세 오류:\n{type(e).__name__}: {str(e)}")
-                import traceback
-                print(f"스택 트레이스:\n{traceback.format_exc()}")
-                continue
-        
-        return recommended_upbits
-        
-    except Exception as e:
-        print(f"상세 오류 정보:\n{type(e).__name__}: {str(e)}")
-        import traceback
-        print(f"스택 트레이스:\n{traceback.format_exc()}")
-        return []
-
-def daily_returns(idate, upbit_dict):
-    recommended_upbits = get_upbit_recommendations(idate, upbit_dict)
-    # 결과를 데이터프레임으로 변환
-    if not recommended_upbits: return np.nan, ''
-    df_results = pd.DataFrame(recommended_upbits)
-    df_results['close'] = df_results['close'].round(2)
-    df_results.columns = ['종목코드', '종가', '기준일', 'is_up', '수익률(%)']
-    df_results.set_index('종목코드', inplace=True)
-    df_results = df_results[['종가', '기준일', 'is_up', '수익률(%)']]
-    
-    # 보유 종목 처리 수정
-    keep = ''
-    if df_results.is_up.any():  # is_up이 True인 경우가 있는지 확인
-        keep = "/".join(df_results.index[df_results.is_up].tolist())
-
-    # 평균 수익률 계산
-    if len(df_results[df_results.is_up == False]) > 0:
-        average_returns = df_results[df_results.is_up == False]['수익률(%)'].sum()
-    else:
-        average_returns = np.nan
-    return average_returns, keep
 
 def update_upbit():
     upbit_info = load_upbit_info()
@@ -177,8 +86,11 @@ def main(upbit_dict):  # upbit_dict 매개변수 추가
     dates = []
     returns = []
     keeps = []
+    upbit_info = load_upbit_info()
+    upbit_info = upbit_info.head(top)
     for ikey in upbit_dict.keys():
-        upbit_dict[ikey] = make_idx(upbit_dict[ikey])
+        params = eval(upbit_info[upbit_info['tickers'] == ikey]['best_param'].values[0])
+        upbit_dict[ikey] = make_idx(upbit_dict[ikey], r1=params['r1'], ad=params['ad'], limad=params['limad'], mc_ratio=params['mc_ratio'], wmean=params['wmean'])
 
     for idate in pd.date_range((pd.to_datetime('today')-pd.to_timedelta(365, unit='D')).strftime("%Y-%m-%d"), pd.to_datetime('today'), freq='D'):
         print(idate)
