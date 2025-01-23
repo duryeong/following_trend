@@ -116,7 +116,7 @@ def main(upbit_dict):  # upbit_dict 매개변수 추가
     df['date'] = dates
     df['returns'] = np.array(returns)/100 + 1
     df = df.fillna(1)
-    df['sum_returns'] = df.returns.cumprod()
+    df['sum_returns'] = df.returns.cumprod()*100
     df['keeps'] = np.array(keeps)
     # df.to_csv('table_upbit.csv')
     return df
@@ -124,7 +124,7 @@ def main(upbit_dict):  # upbit_dict 매개변수 추가
 def web_main(df):
     if st.button('rerun'):
         st.rerun()
-    st.title(f'Following Trend: ETH, BTC')
+    st.title(f'Following Trend: BTC')
     df.returns = (df.returns - 1)*100
     df = df.round(2)
     df.date = df.date.map(lambda x: x.strftime("%Y-%m-%d"))
