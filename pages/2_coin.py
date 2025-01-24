@@ -9,23 +9,25 @@ import mplfinance as mpf
 import numpy as np
 import time
 
-def make_idx(df, r1=7, ad=14, limad=12, wmean=4 ,iyear=None):
-    df[f'rsi{r1*1}'] = tb.rsi(df['close'], length=r1*1)
+def make_idx(df, r1=7, ad=14, limad=12, mc_ratio=100.01, wmean=4 ,iyear=None):
+    df[f'rsi{r1}'] = tb.rsi(df['close'], length=r1)
     df[f'rsi{r1*2}'] = tb.rsi(df['close'], length=r1*2)
     df[f'rsi{r1*3}'] = tb.rsi(df['close'], length=r1*3)
     df[f'adx_{ad}'] = tb.adx(df['high'], df['low'], df['close'], length=ad).iloc[:,0]
     df[f'mean{wmean}'] = df.close.rolling(window=wmean).mean()
+    df[f'mc_ratio_{mc_ratio}'] = df.close / df[f'mean{wmean}']
 
     is_up = []
     for idf in df.iloc:
         # is_up.append(idf.rsi7 > idf.rsi14 > idf.rsi21 and idf.adx > 20)
-        is_up.append(idf[f'rsi{r1}'] > idf[f'rsi{r1*2}'] > idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf.close > idf[f'mean{wmean}'])
+        is_up.append(idf[f'rsi{r1}'] > idf[f'rsi{r1*2}'] > idf[f'rsi{r1*3}'] and idf[f'adx_{ad}'] > limad and idf[f'mc_ratio_{mc_ratio}'] < mc_ratio and idf.close > idf[f'mean{wmean}'])
     df['is_up'] = is_up
+    df['real_is_up'] = df.is_up.shift(1)
+
     df['pre_close'] = df.close.shift(1)
     df['differ'] = (df['close']-df['pre_close'])/df['pre_close']*100
-
-    df = df[['is_up', 'open', 'close', 'differ']]
     df = df[::-1]
+
     return df
 
 def check_buy(c):
@@ -56,15 +58,15 @@ def get_stock(c='AAPL'):
     df = df[['open', 'high', 'low', 'close']]
     return df
 
-#@st.cache_data
 def get_stock_info():
-    df = pd.read_csv('coin_anal.csv')
+    df = pd.read_csv('coin_anal_upbit_for_optimization_2022_2023.csv')
+
     df = df.sort_values(by='best_value', ascending=False)
     df = df[['tickers', 'best_value', 'best_param']]
     eth_df = df[df.tickers == 'KRW-ETH']
     btc_df = df[df.tickers == 'KRW-BTC']
     neth_df = df[df.tickers != 'KRW-ETH']
-    odf = pd.concat([eth_df, btc_df, neth_df.head(18)])
+    odf = pd.concat([btc_df, eth_df, neth_df.head(18)])
     return odf
 
 def get_profit(candle):
@@ -114,8 +116,7 @@ def web_main():
                         # st.write(f'{stock_info.best_value.values[inum]*100:.2f}')
                         candle = get_coin(c=stock_info.tickers.values[inum])
                         info = eval(stock_info['best_param'].values[inum])
-
-                        candle = make_idx(candle, info['r1'], info['ad'], info['limad'], info['wmean'])
+                        candle = make_idx(candle, r1=info['r1'], ad=info['ad'], limad=info['limad'], mc_ratio=info['mc_ratio'], wmean=info['wmean'])
                         dump_df = get_profit(candle)
 
                         st.subheader(f"Profit in the last year: {dump_df.hpr.values[-1]*100:.2f}%, MDD: {dump_df.dd.max():.2f}%")
