@@ -17,7 +17,7 @@ def make_idx(df, r1=7, ad=14, limad=12, mc_ratio=100.01, wmean=4 ,iyear=None):
     df[f'rsi{r1*3}'] = tb.rsi(df['close'], length=r1*3)
     df[f'adx_{ad}'] = tb.adx(df['high'], df['low'], df['close'], length=ad).iloc[:,0]
     df[f'mean{wmean}'] = df.close.rolling(window=wmean).mean()
-    df[f'mc_ratio_{mc_ratio}'] = df.close / df[f'mean{wmean}']
+    df[f'mc_ratio_{mc_ratio}'] = df.close / df.open
 
     is_up = []
     for idf in df.iloc:
